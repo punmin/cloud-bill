@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-bill-dev-env
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-bill-dev-env
+  template:
+    metadata:
+      labels:
+        app: cloud-bill-dev-env
+    spec:
+      containers:
+        - command:
+            - /bin/sh
+          image: golang:1.23.0
+          imagePullPolicy: Always
+          name: go
+          stdin: true
+          tty: true
+          resources: {}
