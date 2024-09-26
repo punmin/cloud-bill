@@ -1,0 +1,14 @@
+database:
+  host: your_host
+  port: 3306
+  user: your_user
+  password: your_password
+  dbname: cloud_bill
+
+cloud:
+  tencent:
+    access_key_id: your_key_id
+    access_key_secret: your_key_secret
+  aliyun:
+    access_key_id: your_key_id
+    access_key_secret: your_key_secret
