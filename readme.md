@@ -12,6 +12,12 @@
   - 账单详情>明细账单（统计项：计费项；统计周期：账期） Billing.DescribeInstanceBill(BillingCycle，IsBillingItem=true) 
 - 账号权限 AliyunBSSReadOnlyAccess
 
+## UCloud
+- 接口 
+  - 财务中心>交易账单>账单明细 ListUBillDetail
+- 账号权限 UBillFullAccess
+- [参考资料](https://docs.ucloud.cn/api/ubill-api/list_u_bill_detail)
+
 
 ## 操作步骤
 1. 使用init-db.sql 初始化数据库

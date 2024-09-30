@@ -29,6 +29,8 @@ var RootCmd = &cobra.Command{
 			SyncAliyunBillToDB(monthYear)
 		case "tencent":
 			SyncTencentBillToDB(monthYear)
+		case "ucloud":
+			SyncUCloudBillToDB(monthYear)
 		default:
 			return fmt.Errorf("unsupported cloud platform: %s", cloudPlatform)
 		}
@@ -80,7 +82,7 @@ func init() {
 	RootCmd.Flags().StringVarP(&monthYear, "bill-month", "m", "", "Specify the bill-month (e.g., 2024-08)")
 	RootCmd.MarkFlagRequired("bill-month") // 标记为必填参数
 
-	RootCmd.Flags().StringVarP(&cloudPlatform, "cloud", "c", "", "Specify the cloud platform (tencent, aliyun, aws)")
+	RootCmd.Flags().StringVarP(&cloudPlatform, "cloud", "c", "", "Specify the cloud platform (tencent, aliyun, ucloud)")
 	RootCmd.MarkFlagRequired("cloud") // 标记为必填参数
 
 }

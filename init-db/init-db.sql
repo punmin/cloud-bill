@@ -104,3 +104,31 @@ CREATE TABLE IF NOT EXISTS `tencent_bill_resource_summary` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- CREATE UNIQUE INDEX idx_bill_id ON tencent_bill_resource_summary (`bill_month`,`payer_uin`,`business_code`,`product_code`,`resource_id`,`order_id`,`config_desc`);
+
+
+CREATE TABLE IF NOT EXISTS `ucloud_bill_resource_summary` (
+  `id` int AUTO_INCREMENT NOT NULL ,
+  `bill_month` datetime NULL COMMENT '账单归属月',
+  `admin` int NULL COMMENT '是否为主账号',
+  `amount` decimal(18,8) NULL COMMENT '订单总金额',
+  `amount_coupon` decimal(18,8) NULL COMMENT '代金券抵扣',
+  `amount_free` decimal(18,8) NULL COMMENT '赠送金额抵扣',
+  `amount_real` decimal(18,8) NULL COMMENT '现金账户支付',
+  `az_group_c_name` varchar(50) NULL COMMENT '可用区',
+  `charge_type` varchar(50) NULL COMMENT '计费方式: Year按年,Month按月,Day按天,Dynamic按时,Used按量,Donate赠送,Trial试用,Post后付费,Spot抢占式',
+  `create_time` datetime NULL COMMENT '创建时间',
+  `item_details` varchar(255) NULL COMMENT '产品配置',
+  `order_no` varchar(50) NULL COMMENT '订单号',
+  `order_type` varchar(50) NULL COMMENT '订单类型: OT_BUY新购,OT_RENEW续费,OT_UPGRADE升级,OT_DOWNGRADE降级,OT_SUSPEND结算,OT_ADDITIONAL补单  OT_REFUND删除,OT_POSTPAID_RENEW过期,OT_POSTPAID_PAYMENT后付费,OT_RECOVER删除恢复',
+  `project_name` varchar(50) NULL COMMENT '项目名称',
+  `resource_extend_info` varchar(255) NULL COMMENT '资源标识',
+  `resource_id` varchar(50) NULL COMMENT '资源ID',
+  `resource_type` varchar(50) NULL COMMENT '产品类型: uhost云主机,udisk普通云硬盘,udb云数据库,eip弹性IP,ufile对象存储,fortress_host堡垒机  ufs文件存储,wafWEB应用防火墙,ues弹性搜索,udisk_ssdSSD云硬盘,rssdRSSD云硬盘',
+  `resource_type_code` int NULL COMMENT '产品类型代码',
+  `show_hover` int NULL COMMENT '订单支付状态: 0未支付,1已支付',
+  `start_time` datetime NULL COMMENT '开始时间',
+  `user_display_name` varchar(50) NULL COMMENT '账户昵称',
+  `user_email` varchar(50) NULL COMMENT '账户邮箱',
+  `user_name` varchar(50) NULL COMMENT '账户名',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
