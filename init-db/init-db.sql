@@ -132,3 +132,13 @@ CREATE TABLE IF NOT EXISTS `ucloud_bill_resource_summary` (
   `user_name` varchar(50) NULL COMMENT '账户名',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE IF NOT EXISTS `aws_bill_resource_summary` (
+  `id` int AUTO_INCREMENT NOT NULL ,
+  `bill_month` datetime NULL COMMENT '账单归属月',
+  `service` varchar(100) NULL COMMENT '服务名称',
+  `region` varchar(100) NULL COMMENT '地域',
+  `unblended_cost` decimal(18,8) NULL COMMENT '未混合成本',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
