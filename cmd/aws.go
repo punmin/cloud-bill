@@ -19,6 +19,7 @@ type AWSBill struct {
 	Service       string
 	Region        string
 	UnblendedCost string
+	ExchangeRate  string
 }
 
 func GetAWSTimePeriod(month string) (string, string) {
@@ -37,6 +38,7 @@ func GetAWSTimePeriod(month string) (string, string) {
 }
 
 func GetAWSBill(month string) ([]*AWSBill, error) {
+	exchange_rate := viper.GetString("cloud.aws.usd_to_cny_exchange_rate")
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion("us-west-2"),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(viper.GetString("cloud.aws.access_key_id"), viper.GetString("cloud.aws.access_key_secret"), "")),
@@ -50,9 +52,7 @@ func GetAWSBill(month string) ([]*AWSBill, error) {
 
 	// 设置查询时间范围
 	start, end := GetAWSTimePeriod(month)
-
-	var resourceSummarySet []*AWSBill
-	resourceSummarySet = make([]*AWSBill, 0)
+	resourceSummarySet := make([]*AWSBill, 0)
 
 	// 创建 GetCostAndUsageInput 请求
 	input := &costexplorer.GetCostAndUsageInput{
@@ -87,6 +87,7 @@ func GetAWSBill(month string) ([]*AWSBill, error) {
 						Service:       group.Keys[0],
 						Region:        group.Keys[1],
 						UnblendedCost: *metric.Amount,
+						ExchangeRate:  exchange_rate,
 					})
 					//fmt.Printf("key: %s, metric: %s, Amount: %s, Unit: %s\n", group.Keys, metrics_name, *metric.Amount, *metric.Unit)
 				}
@@ -126,6 +127,7 @@ func SaveAWSBillToDB(billMonth string, resourceSummarySet []*AWSBill) {
 			"service",
 			"region",
 			"unblended_cost",
+			"exchange_rate",
 		)
 
 	_billMonth, _err := time.Parse("2006-01", billMonth)
@@ -140,6 +142,7 @@ func SaveAWSBillToDB(billMonth string, resourceSummarySet []*AWSBill) {
 			rs.Service,
 			rs.Region,
 			rs.UnblendedCost,
+			rs.ExchangeRate,
 		)
 	}
 
