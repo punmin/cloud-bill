@@ -143,3 +143,18 @@ CREATE TABLE IF NOT EXISTS `aws_bill_resource_summary` (
   `exchange_rate` decimal(8,4) NOT NULL COMMENT '汇率，非aws提供，仅供参考',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- cost_cny 原价-人民币， real_cost_cny  应付款-人民币， cash_pay_cny 现金支付-人民币, product_name 产品名称
+CREATE OR REPLACE VIEW all_bill_resource_summary AS
+select bill_month, "aws" as cloud, `service` as product_name, unblended_cost*exchange_rate as cost_cny, unblended_cost*exchange_rate as real_cost_cny, unblended_cost*exchange_rate as cash_pay_cny
+from aws_bill_resource_summary
+union all
+select bill_month, "ucloud" as cloud, `resource_type` as product_name, amount as cost_cny, amount_real as real_cost_cny, amount_real as cash_pay_cny  
+from ucloud_bill_resource_summary
+union all
+select bill_month, "aliyun" as cloud, product_name, pretax_gross_amount as cost_cny, pretax_amount as real_cost_cny, cash_amount as cash_pay_cny 
+from aliyun_bill_resource_summary
+union all
+select bill_month, "tencent" as cloud, `business_code_name` as product_name, total_cost as cost_cny, real_total_cost as real_cost_cny, cash_pay_amount as cash_pay_cny
+from tencent_bill_resource_summary;
