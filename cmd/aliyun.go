@@ -10,8 +10,6 @@ import (
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/liqiongfan/leopards"
-	"github.com/spf13/viper"
 )
 
 // Description:
@@ -21,12 +19,12 @@ import (
 // @return Client
 //
 // @throws Exception
-func CreateClient() (_result *bssopenapi20171214.Client, _err error) {
+func CreateClient(access_key_id string, access_key_secret string) (_result *bssopenapi20171214.Client, _err error) {
 	// 工程代码泄露可能会导致 AccessKey 泄露，并威胁账号下所有资源的安全性。以下代码示例仅供参考。
 	// 建议使用更安全的 STS 方式，更多鉴权访问方式请参见：https://help.aliyun.com/document_detail/378661.html。
 	config := &openapi.Config{
-		AccessKeyId:     tea.String(viper.GetString("cloud.aliyun.access_key_id")),
-		AccessKeySecret: tea.String(viper.GetString("cloud.aliyun.access_key_secret")),
+		AccessKeyId:     tea.String(access_key_id),
+		AccessKeySecret: tea.String(access_key_secret),
 	}
 	// Endpoint 请参考 https://api.aliyun.com/product/BssOpenApi
 	config.Endpoint = tea.String("business.aliyuncs.com")
@@ -35,8 +33,8 @@ func CreateClient() (_result *bssopenapi20171214.Client, _err error) {
 	return _result, _err
 }
 
-func GetAliyunBill(month string) ([]*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems, error) {
-	client, _err := CreateClient()
+func GetAliyunBill(month string, account CloudAccount) ([]*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems, error) {
+	client, _err := CreateClient(account.AccessKeyID, account.AccessKeySecret)
 	if _err != nil {
 		return nil, fmt.Errorf("client error has returned: %s", _err)
 	}
@@ -69,25 +67,13 @@ func GetAliyunBill(month string) ([]*bssopenapi20171214.DescribeInstanceBillResp
 
 	}
 
-	fmt.Printf("Total: %d\n", len(resourceSummarySet))
+	fmt.Printf("Aliyun Total: %d\n", len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 
 }
 
 func SaveAliyunBillToDB(billMonth string, resourceSummarySet []*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems) {
-	db, err := leopards.OpenOptions{
-		User:     viper.GetString("database.user"),
-		Password: viper.GetString("database.password"),
-		Host:     viper.GetString("database.host"),
-		Port:     viper.GetString("database.port"),
-		Database: viper.GetString("database.dbname"),
-		Debug:    false, // 是否开启调试，开启调试会输出SQL到标准输出
-		Dialect:  leopards.MySQL,
-	}.Open()
-	if err != nil {
-		panic(err)
-	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
@@ -225,8 +211,8 @@ func SaveAliyunBillToDB(billMonth string, resourceSummarySet []*bssopenapi201712
 		panic(err2)
 	}
 }
-func SyncAliyunBillToDB(month string) {
-	resourceSummarySet, err := GetAliyunBill(month)
+func SyncAliyunBillToDB(month string, account CloudAccount) {
+	resourceSummarySet, err := GetAliyunBill(month, account)
 	if err != nil {
 		panic(err)
 	}

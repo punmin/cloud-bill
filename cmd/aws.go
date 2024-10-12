@@ -11,8 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
-	"github.com/liqiongfan/leopards"
-	"github.com/spf13/viper"
 )
 
 type AWSBill struct {
@@ -37,11 +35,11 @@ func GetAWSTimePeriod(month string) (string, string) {
 	return month + "-01", next.Format("2006-01") + "-01"
 }
 
-func GetAWSBill(month string) ([]*AWSBill, error) {
-	exchange_rate := viper.GetString("cloud.aws.usd_to_cny_exchange_rate")
+func GetAWSBill(month string, account CloudAccount) ([]*AWSBill, error) {
+	exchange_rate := appConfig.UsdToCnyExchangeRate
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion("us-west-2"),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(viper.GetString("cloud.aws.access_key_id"), viper.GetString("cloud.aws.access_key_secret"), "")),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(account.AccessKeyID, account.AccessKeySecret, "")),
 	)
 
 	if err != nil {
@@ -87,7 +85,7 @@ func GetAWSBill(month string) ([]*AWSBill, error) {
 						Service:       group.Keys[0],
 						Region:        group.Keys[1],
 						UnblendedCost: *metric.Amount,
-						ExchangeRate:  exchange_rate,
+						ExchangeRate:  fmt.Sprintf("%.4f", exchange_rate),
 					})
 					//fmt.Printf("key: %s, metric: %s, Amount: %s, Unit: %s\n", group.Keys, metrics_name, *metric.Amount, *metric.Unit)
 				}
@@ -99,25 +97,12 @@ func GetAWSBill(month string) ([]*AWSBill, error) {
 		input.NextPageToken = result.NextPageToken
 	}
 
-	fmt.Printf("Total: %d\n", len(resourceSummarySet))
+	fmt.Printf("AWS Total: %d\n", len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 }
 
 func SaveAWSBillToDB(billMonth string, resourceSummarySet []*AWSBill) {
-	db, err := leopards.OpenOptions{
-		User:     viper.GetString("database.user"),
-		Password: viper.GetString("database.password"),
-		Host:     viper.GetString("database.host"),
-		Port:     viper.GetString("database.port"),
-		Database: viper.GetString("database.dbname"),
-		Debug:    false, // 是否开启调试，开启调试会输出SQL到标准输出
-		Dialect:  leopards.MySQL,
-	}.Open()
-	if err != nil {
-		panic(err)
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -151,8 +136,8 @@ func SaveAWSBillToDB(billMonth string, resourceSummarySet []*AWSBill) {
 		panic(err2)
 	}
 }
-func SyncAWSBillToDB(month string) {
-	resourceSummarySet, err := GetAWSBill(month)
+func SyncAWSBillToDB(month string, account CloudAccount) {
+	resourceSummarySet, err := GetAWSBill(month, account)
 	if err != nil {
 		panic(err)
 	}

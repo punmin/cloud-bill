@@ -5,20 +5,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/liqiongfan/leopards"
-	"github.com/spf13/viper"
 	"github.com/ucloud/ucloud-sdk-go/services/ubill"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
 )
 
-func GetUCloudBill(month string) ([]ubill.BillDetailItem, error) {
+func GetUCloudBill(month string, account CloudAccount) ([]ubill.BillDetailItem, error) {
 	cfg := ucloud.NewConfig()
 	cfg.Region = "cn-gd"
 
 	credential := auth.NewCredential()
-	credential.PublicKey = viper.GetString("cloud.ucloud.access_key_id")
-	credential.PrivateKey = viper.GetString("cloud.ucloud.access_key_secret")
+	credential.PublicKey = account.AccessKeyID
+	credential.PrivateKey = account.AccessKeySecret
 
 	ubillClient := ubill.NewClient(&cfg, &credential)
 
@@ -52,26 +50,13 @@ func GetUCloudBill(month string) ([]ubill.BillDetailItem, error) {
 		}
 	}
 
-	fmt.Printf("Total: %d\n", len(resourceSummarySet))
+	fmt.Printf("Ucloud Total: %d\n", len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 
 }
 
 func SaveUCloudBillToDB(billMonth string, resourceSummarySet []ubill.BillDetailItem) {
-	db, err := leopards.OpenOptions{
-		User:     viper.GetString("database.user"),
-		Password: viper.GetString("database.password"),
-		Host:     viper.GetString("database.host"),
-		Port:     viper.GetString("database.port"),
-		Database: viper.GetString("database.dbname"),
-		Debug:    false, // 是否开启调试，开启调试会输出SQL到标准输出
-		Dialect:  leopards.MySQL,
-	}.Open()
-	if err != nil {
-		panic(err)
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -138,8 +123,8 @@ func SaveUCloudBillToDB(billMonth string, resourceSummarySet []ubill.BillDetailI
 	}
 }
 
-func SyncUCloudBillToDB(month string) {
-	resourceSummarySet, err := GetUCloudBill(month)
+func SyncUCloudBillToDB(month string, account CloudAccount) {
+	resourceSummarySet, err := GetUCloudBill(month, account)
 	if err != nil {
 		panic(err)
 	}

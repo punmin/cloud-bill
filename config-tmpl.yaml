@@ -5,10 +5,38 @@ database:
   password: your_password
   dbname: cloud_bill
 
+
+usd_to_cny_exchange_rate: 7.0
+
+
 cloud:
-  tencent:
+  - account_alias_name: your_account_alias_name
+    cloud_provider: tencent
+    main_account_id: your_main_account_id
     access_key_id: your_key_id
     access_key_secret: your_key_secret
-  aliyun:
+    enabled: true
+  - account_alias_name: your_account_alias_name2
+    cloud_provider: tencent
+    main_account_id: your_main_account_id2
+    access_key_id: your_key_id2
+    access_key_secret: your_key_secret2
+    enabled: false
+  - account_alias_name: your_account_alias_name
+    cloud_provider: aliyun
+    main_account_id: your_main_account_id
     access_key_id: your_key_id
     access_key_secret: your_key_secret
+    enabled: true
+  - account_alias_name: your_account_alias_name
+    cloud_provider: ucloud
+    main_account_id: your_main_account_id
+    access_key_id: your_key_id
+    access_key_secret: your_key_secret
+    enabled: true
+  - account_alias_name: your_account_alias_name
+    cloud_provider: aws
+    main_account_id: your_main_account_id
+    access_key_id: your_key_id
+    access_key_secret: your_key_secret
+    enabled: true

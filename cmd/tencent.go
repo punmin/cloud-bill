@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/liqiongfan/leopards"
-	"github.com/spf13/viper"
 	billing "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/billing/v20180709"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
@@ -22,11 +20,8 @@ func StringTags(tags []*billing.BillTagInfo) string {
 	return string(tagsJSON)
 }
 
-func GetTencentBill(month string) ([]*billing.BillResourceSummary, error) {
-	secretId := viper.GetString("cloud.tencent.access_key_id")
-	secretKey := viper.GetString("cloud.tencent.access_key_secret")
-
-	credential := common.NewCredential(secretId, secretKey)
+func GetTencentBill(month string, account CloudAccount) ([]*billing.BillResourceSummary, error) {
+	credential := common.NewCredential(account.AccessKeyID, account.AccessKeySecret)
 	cpf := profile.NewClientProfile()
 	cpf.HttpProfile.Endpoint = "billing.tencentcloudapi.com"
 	client, err := billing.NewClient(credential, "ap-guangzhou", cpf)
@@ -67,25 +62,12 @@ func GetTencentBill(month string) ([]*billing.BillResourceSummary, error) {
 		}
 	}
 
-	fmt.Printf("Total: %d\n", len(resourceSummarySet))
+	fmt.Printf("Tencent Total: %d\n", len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 }
 
 func SaveTencentBillToDB(resourceSummarySet []*billing.BillResourceSummary) {
-	db, err := leopards.OpenOptions{
-		User:     viper.GetString("database.user"),
-		Password: viper.GetString("database.password"),
-		Host:     viper.GetString("database.host"),
-		Port:     viper.GetString("database.port"),
-		Database: viper.GetString("database.dbname"),
-		Debug:    false, // 是否开启调试，开启调试会输出SQL到标准输出
-		Dialect:  leopards.MySQL,
-	}.Open()
-	if err != nil {
-		panic(err)
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -183,8 +165,8 @@ func SaveTencentBillToDB(resourceSummarySet []*billing.BillResourceSummary) {
 	}
 }
 
-func SyncTencentBillToDB(month string) {
-	resourceSummarySet, err := GetTencentBill(month)
+func SyncTencentBillToDB(month string, account CloudAccount) {
+	resourceSummarySet, err := GetTencentBill(month, account)
 	if err != nil {
 		panic(err)
 	}
