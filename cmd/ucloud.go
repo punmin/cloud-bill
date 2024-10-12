@@ -56,7 +56,7 @@ func GetUCloudBill(month string, account CloudAccount) ([]ubill.BillDetailItem, 
 
 }
 
-func SaveUCloudBillToDB(billMonth string, resourceSummarySet []ubill.BillDetailItem) {
+func SaveUCloudBillToDB(account CloudAccount, billMonth string, resourceSummarySet []ubill.BillDetailItem) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -83,7 +83,9 @@ func SaveUCloudBillToDB(billMonth string, resourceSummarySet []ubill.BillDetailI
 			"start_time",
 			"user_display_name",
 			"user_email",
-			"user_name")
+			"user_name",
+			"bill_account_id",
+		)
 
 	_billMonth, _err := time.Parse("2006-01", billMonth)
 	if _err != nil {
@@ -114,7 +116,9 @@ func SaveUCloudBillToDB(billMonth string, resourceSummarySet []ubill.BillDetailI
 			time.Unix(int64(rs.StartTime), 0),
 			rs.UserDisplayName,
 			rs.UserEmail,
-			rs.UserName)
+			rs.UserName,
+			account.MainAccountID,
+		)
 	}
 
 	_, err2 := batchInsert.Save(ctx)
@@ -128,5 +132,5 @@ func SyncUCloudBillToDB(month string, account CloudAccount) {
 	if err != nil {
 		panic(err)
 	}
-	SaveUCloudBillToDB(month, resourceSummarySet)
+	SaveUCloudBillToDB(account, month, resourceSummarySet)
 }

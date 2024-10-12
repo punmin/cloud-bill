@@ -102,7 +102,7 @@ func GetAWSBill(month string, account CloudAccount) ([]*AWSBill, error) {
 	return resourceSummarySet, nil
 }
 
-func SaveAWSBillToDB(billMonth string, resourceSummarySet []*AWSBill) {
+func SaveAWSBillToDB(account CloudAccount, billMonth string, resourceSummarySet []*AWSBill) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -113,6 +113,7 @@ func SaveAWSBillToDB(billMonth string, resourceSummarySet []*AWSBill) {
 			"region",
 			"unblended_cost",
 			"exchange_rate",
+			"bill_account_id",
 		)
 
 	_billMonth, _err := time.Parse("2006-01", billMonth)
@@ -128,6 +129,7 @@ func SaveAWSBillToDB(billMonth string, resourceSummarySet []*AWSBill) {
 			rs.Region,
 			rs.UnblendedCost,
 			rs.ExchangeRate,
+			account.MainAccountID,
 		)
 	}
 
@@ -141,5 +143,5 @@ func SyncAWSBillToDB(month string, account CloudAccount) {
 	if err != nil {
 		panic(err)
 	}
-	SaveAWSBillToDB(month, resourceSummarySet)
+	SaveAWSBillToDB(account, month, resourceSummarySet)
 }
