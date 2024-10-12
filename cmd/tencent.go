@@ -62,7 +62,7 @@ func GetTencentBill(month string, account CloudAccount) ([]*billing.BillResource
 		}
 	}
 
-	fmt.Printf("%s Tencent Total: %d\n", month, len(resourceSummarySet))
+	fmt.Printf("%s %s Tencent Total: %d\n", month, account.MainAccountID, len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 }

@@ -50,7 +50,7 @@ func GetUCloudBill(month string, account CloudAccount) ([]ubill.BillDetailItem, 
 		}
 	}
 
-	fmt.Printf("%s Ucloud Total: %d\n", month, len(resourceSummarySet))
+	fmt.Printf("%s %s Ucloud Total: %d\n", month, account.MainAccountID, len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 
