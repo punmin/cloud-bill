@@ -67,7 +67,7 @@ func GetAliyunBill(month string, account CloudAccount) ([]*bssopenapi20171214.De
 
 	}
 
-	fmt.Printf("Aliyun Total: %d\n", len(resourceSummarySet))
+	fmt.Printf("%s Aliyun Total: %d\n", month, len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 

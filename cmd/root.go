@@ -9,7 +9,8 @@ import (
 )
 
 // 定义年月参数
-var monthYear string
+var startMonth string
+var endMonth string
 var appConfig AppConfig
 var db *leopards.DB
 
@@ -18,24 +19,39 @@ var RootCmd = &cobra.Command{
 	Use:   "cloud-bill",
 	Short: "sync bill data from cloud providers to local database",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if endMonth == "" {
+			endMonth = startMonth
+		}
+		fmt.Printf("start: %s, end: %s\n", startMonth, endMonth)
+
 		// 验证年月参数格式
-		if err := validateMonthYear(monthYear); err != nil {
+		if err := validateMonthYear(startMonth); err != nil {
+			return err
+		}
+		if err := validateMonthYear(endMonth); err != nil {
 			return err
 		}
 
-		for _, account := range appConfig.Cloud {
-			if account.Enabled {
-				switch account.CloudProvider {
-				case "aliyun":
-					SyncAliyunBillToDB(monthYear, account)
-				case "tencent":
-					SyncTencentBillToDB(monthYear, account)
-				case "ucloud":
-					SyncUCloudBillToDB(monthYear, account)
-				case "aws":
-					SyncAWSBillToDB(monthYear, account)
-				default:
-					return fmt.Errorf("unsupported cloud platform: %s", account.CloudProvider)
+		months, err := getMonthsBetween(startMonth, endMonth)
+		if err != nil {
+			return err
+		}
+
+		for _, month := range months {
+			for _, account := range appConfig.Cloud {
+				if account.Enabled {
+					switch account.CloudProvider {
+					case "aliyun":
+						SyncAliyunBillToDB(month, account)
+					case "tencent":
+						SyncTencentBillToDB(month, account)
+					case "ucloud":
+						SyncUCloudBillToDB(month, account)
+					case "aws":
+						SyncAWSBillToDB(month, account)
+					default:
+						return fmt.Errorf("unsupported cloud platform: %s", account.CloudProvider)
+					}
 				}
 			}
 		}
@@ -73,7 +89,7 @@ func init() {
 		panic(err)
 	}
 
-	RootCmd.Flags().StringVarP(&monthYear, "bill-month", "m", "", "Specify the bill-month (e.g., 2024-08)")
-	RootCmd.MarkFlagRequired("bill-month") // 标记为必填参数
+	RootCmd.Flags().StringVarP(&startMonth, "start-month", "s", getLastMonth(), "Specify the start-month (e.g., YYYY-MM), default is last month")
+	RootCmd.Flags().StringVarP(&endMonth, "end-month", "e", "", "Specify the end-month (e.g., YYYY-MM), default is same as start-month")
 
 }

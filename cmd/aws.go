@@ -97,7 +97,7 @@ func GetAWSBill(month string, account CloudAccount) ([]*AWSBill, error) {
 		input.NextPageToken = result.NextPageToken
 	}
 
-	fmt.Printf("AWS Total: %d\n", len(resourceSummarySet))
+	fmt.Printf("%s AWS Total: %d\n", month, len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 }

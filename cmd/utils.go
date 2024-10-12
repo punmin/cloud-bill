@@ -35,3 +35,30 @@ func validateMonthYear(monthYear string) error {
 
 	return nil
 }
+
+func getLastMonth() string {
+	now := time.Now()
+	lastMonth := now.AddDate(0, -1, 0)
+	return lastMonth.Format("2006-01")
+}
+
+func getMonthsBetween(start, end string) ([]string, error) {
+	var months []string
+
+	startTime, err := time.Parse("2006-01", start)
+	if err != nil {
+		return nil, fmt.Errorf("invalid start date: %v", err)
+	}
+	endTime, err := time.Parse("2006-01", end)
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid end date: %v", err)
+	}
+
+	for startTime.Before(endTime) || startTime.Equal(endTime) {
+		months = append(months, startTime.Format("2006-01"))
+		startTime = startTime.AddDate(0, 1, 0)
+	}
+	return months, nil
+
+}
