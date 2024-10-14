@@ -1,4 +1,10 @@
 # 说明
+## 注意事项
+- account_info账户信息表需要手动插入数据，将配置文件的main_account_id,account_alias_name和关联起来
+```sql
+insert into account_info(bill_account_id, bill_account_alias)values('your_main_account_id', 'your_account_alias_name');
+```
+
 ## 腾讯云
 - 接口
   - 费用中心>费用账单>账单查看>资源账单 Billing.DescribeBillResourceSummary

@@ -147,8 +147,18 @@ CREATE TABLE IF NOT EXISTS `aws_bill_resource_summary` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+CREATE TABLE IF NOT EXISTS `account_info` (
+  `id` int AUTO_INCREMENT NOT NULL ,
+  `bill_account_id` varchar(50) NOT NULL COMMENT '账单所属账号ID',
+  `bill_account_alias` varchar(50) NOT NULL COMMENT '账单所属账号别名',  
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_bill_account_id` (`bill_account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- cost_cny 原价-人民币， real_cost_cny  应付款-人民币， cash_pay_cny 现金支付-人民币, product_name 产品名称
 CREATE OR REPLACE VIEW all_bill_resource_summary AS
+select t1.bill_month ,t1.cloud, t2.bill_account_alias, t1.product_name, t1.cost_cny, t1.real_cost_cny, t1.cash_pay_cny from(
 select bill_month, "aws" as cloud, bill_account_id, `service` as product_name, unblended_cost*exchange_rate as cost_cny, unblended_cost*exchange_rate as real_cost_cny, unblended_cost*exchange_rate as cash_pay_cny
 from aws_bill_resource_summary
 union all
@@ -159,4 +169,7 @@ select bill_month, "aliyun" as cloud, bill_account_id, product_name, pretax_gros
 from aliyun_bill_resource_summary
 union all
 select bill_month, "tencent" as cloud, `owner_uin` as bill_account_id, `business_code_name` as product_name, total_cost as cost_cny, real_total_cost as real_cost_cny, cash_pay_amount as cash_pay_cny
-from tencent_bill_resource_summary;
+from tencent_bill_resource_summary) t1 
+left join (select bill_account_alias,bill_account_id from account_info) t2 
+on t1.bill_account_id = t2.bill_account_id;
+
