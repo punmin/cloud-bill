@@ -5,6 +5,16 @@
 insert into account_info(bill_account_id, bill_account_alias)values('your_main_account_id', 'your_account_alias_name');
 ```
 
+- 备份时不备份视图，要不然导入时，会提示权限问题
+```sql
+-- 导出所有表，不包括视图
+mysqldump -uroot -h your_host --no-create-db --ignore-table=cloud_bill.all_bill_resource_summary   -p cloud_bill  > cloud_bill.sql
+
+-- 导入所有表
+mysql -ucloud_bill -h your_host  -p cloud_bill  < cloud_bill.sql
+```
+
+
 ## 腾讯云
 - 接口
   - 费用中心>费用账单>账单查看>资源账单 Billing.DescribeBillResourceSummary
