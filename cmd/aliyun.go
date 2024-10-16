@@ -152,7 +152,11 @@ func SaveAliyunBillToDB(billMonth string, resourceSummarySet []*bssopenapi201712
 			usage = tea.String("0")
 		}
 
-		discount := 1 - (*rs.PretaxAmount / *rs.PretaxGrossAmount)
+		discount := *tea.Float32(0)
+
+		if *rs.PretaxAmount != 0.0 {
+			discount = *rs.PretaxAmount / *rs.PretaxGrossAmount
+		}
 
 		batchInsert.Values(
 			_billMonthString,

@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `aliyun_bill_resource_summary` (
   `pip_code` varchar(50) NULL COMMENT '产品Code',
   `pretax_amount` decimal(18,8) NULL COMMENT '应付金额',
   `pretax_gross_amount` decimal(18,8) NULL COMMENT '原始金额',
-  `discount` decimal(3,2) NULL COMMENT '折扣率：本资源享受的折扣率，接口未提供，计算公式：1-(pretax_amount/pretax_gross_amount)',
+  `discount` decimal(3,2) NULL COMMENT '折扣率：本资源享受的折扣率，接口未提供，计算公式：pretax_amount/pretax_gross_amount',
   `product_code` varchar(50) NULL COMMENT '产品代码',
   `product_detail` varchar(255) NULL COMMENT '产品明细',
   `product_name` varchar(50) NULL COMMENT '产品名称',
