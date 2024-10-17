@@ -47,12 +47,12 @@ func getMonthsBetween(start, end string) ([]string, error) {
 
 	startTime, err := time.Parse("2006-01", start)
 	if err != nil {
-		return nil, fmt.Errorf("invalid start date: %v", err)
+		return nil, fmt.Errorf("invalid start date: %w", err)
 	}
 	endTime, err := time.Parse("2006-01", end)
 
 	if err != nil {
-		return nil, fmt.Errorf("invalid end date: %v", err)
+		return nil, fmt.Errorf("invalid end date: %w", err)
 	}
 
 	for startTime.Before(endTime) || startTime.Equal(endTime) {

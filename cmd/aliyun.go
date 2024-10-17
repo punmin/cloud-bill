@@ -37,7 +37,7 @@ func CreateClient(access_key_id string, access_key_secret string) (_result *bsso
 func GetAliyunBill(month string, account CloudAccount) ([]*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems, error) {
 	client, _err := CreateClient(account.AccessKeyID, account.AccessKeySecret)
 	if _err != nil {
-		return nil, fmt.Errorf("client error has returned: %s", _err)
+		return nil, fmt.Errorf("client error has returned: %w", _err)
 	}
 
 	describeInstanceBillRequest := &bssopenapi20171214.DescribeInstanceBillRequest{
@@ -52,11 +52,11 @@ func GetAliyunBill(month string, account CloudAccount) ([]*bssopenapi20171214.De
 	for {
 		response, err := client.DescribeInstanceBillWithOptions(describeInstanceBillRequest, runtime)
 		if _, ok := err.(*tea.SDKError); ok {
-			return nil, fmt.Errorf("An API error has returned: %s", err)
+			return nil, fmt.Errorf("an API error has returned: %w", err)
 		}
 
 		if err != nil {
-			return nil, fmt.Errorf("Failed to get bill detail: %s", err)
+			return nil, fmt.Errorf("failed to get bill detail: %w", err)
 		}
 
 		resourceSummarySet = append(resourceSummarySet, response.Body.Data.Items...)

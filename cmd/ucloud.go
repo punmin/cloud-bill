@@ -36,7 +36,7 @@ func GetUCloudBill(month string, account CloudAccount) ([]ubill.BillDetailItem, 
 		response, err := ubillClient.ListUBillDetail(req)
 
 		if err != nil {
-			return nil, fmt.Errorf("failed to get bill detail: %s", err)
+			return nil, fmt.Errorf("failed to get bill detail: %w", err)
 		}
 
 		resourceSummarySet = append(resourceSummarySet, response.Items...)

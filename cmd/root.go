@@ -67,13 +67,13 @@ func init() {
 	// 读取配置文件
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %s", err))
+		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
 	// 使用Unmarshal方法将整个配置文件映射到结构体
 	err = viper.Unmarshal(&appConfig)
 	if err != nil {
-		panic(fmt.Errorf("unable to decode into struct, %v", err))
+		panic(fmt.Errorf("unable to decode into struct, %w", err))
 	}
 
 	db, err = leopards.OpenOptions{

@@ -27,7 +27,7 @@ func GetTencentBill(month string, account CloudAccount) ([]*billing.BillResource
 	cpf.HttpProfile.Endpoint = "billing.tencentcloudapi.com"
 	client, err := billing.NewClient(credential, "ap-guangzhou", cpf)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create client: %s", err)
+		return nil, fmt.Errorf("failed to create client: %w", err)
 	}
 
 	request := billing.NewDescribeBillResourceSummaryRequest()
@@ -44,11 +44,11 @@ func GetTencentBill(month string, account CloudAccount) ([]*billing.BillResource
 		request.Offset = offset
 		response, err := client.DescribeBillResourceSummary(request)
 		if _, ok := err.(*errors.TencentCloudSDKError); ok {
-			return nil, fmt.Errorf("An API error has returned: %s", err)
+			return nil, fmt.Errorf("an API error has returned: %w", err)
 		}
 
 		if err != nil {
-			return nil, fmt.Errorf("Failed to get bill detail: %s", err)
+			return nil, fmt.Errorf("failed to get bill detail: %w", err)
 		}
 
 		resourceSummarySet = append(resourceSummarySet, response.Response.ResourceSummarySet...)
