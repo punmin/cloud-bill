@@ -61,6 +61,9 @@ func GetTencentBill(month string, account CloudAccount) ([]*billing.BillResource
 		if *total == 0 || *offset >= uint64(*total) {
 			break
 		}
+
+		//防止请求超过云平台的限制
+		sleepForFraction(account.FetchPerSecond)
 	}
 
 	fmt.Printf("%s %s Tencent Total: %d\n", month, account.MainAccountID, len(resourceSummarySet))

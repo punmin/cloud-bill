@@ -17,6 +17,7 @@ type CloudAccount struct {
 	MainAccountID    string `mapstructure:"main_account_id"`
 	AccessKeyID      string `mapstructure:"access_key_id"`
 	AccessKeySecret  string `mapstructure:"access_key_secret"`
+	FetchPerSecond   int    `mapstructure:"fetch_per_second"`
 	Enabled          bool   `mapstructure:"enabled"`
 }
 

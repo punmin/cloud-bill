@@ -96,6 +96,9 @@ func GetAWSBill(month string, account CloudAccount) ([]*AWSBill, error) {
 			break
 		}
 		input.NextPageToken = result.NextPageToken
+
+		//防止请求超过云平台的限制
+		sleepForFraction(account.FetchPerSecond)
 	}
 
 	fmt.Printf("%s %s AWS Total: %d\n", month, account.MainAccountID, len(resourceSummarySet))

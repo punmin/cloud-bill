@@ -62,3 +62,12 @@ func getMonthsBetween(start, end string) ([]string, error) {
 	return months, nil
 
 }
+
+func sleepForFraction(x int) {
+	if x <= 0 {
+		fmt.Println("The input must be a positive integer.")
+		return
+	}
+	w := time.Second / time.Duration(x)
+	time.Sleep(w)
+}

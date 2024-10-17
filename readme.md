@@ -20,19 +20,23 @@ mysql -ucloud_bill -h your_host  -p cloud_bill  < cloud_bill.sql
   - 费用中心>费用账单>账单查看>资源账单 Billing.DescribeBillResourceSummary
   - 费用中心>费用账单>账单查看>明细账单（组件名称等同于阿里云的计费项） Billing.DescribeBillDetail
 - 账号权限 QcloudFinanceBillReadOnlyAccess、QcloudFinanceCostExplorerReadOnlyAccess	
-
+- [接口说明](https://console.cloud.tencent.com/api/explorer?Product=billing&Version=2018-07-09&Action=DescribeBillResourceSummary)
+- 请求频率限制 5次/秒
 
 ## 阿里云
 - 接口
   - 账单详情>明细账单（统计项：实例；统计周期：账期） Billing.DescribeInstanceBill(BillingCycle，IsBillingItem=false) 
   - 账单详情>明细账单（统计项：计费项；统计周期：账期） Billing.DescribeInstanceBill(BillingCycle，IsBillingItem=true) 
 - 账号权限 AliyunBSSReadOnlyAccess
+- [接口说明](https://next.api.aliyun.com/api/BssOpenApi/2017-12-14/DescribeInstanceBill)
+- 请求频率限制 10次/秒
 
 ## UCloud
 - 接口 
   - 财务中心>交易账单>账单明细 ListUBillDetail
 - 账号权限 UBillFullAccess
 - [参考资料](https://docs.ucloud.cn/api/ubill-api/list_u_bill_detail)
+- 请求频率限制 未找到文档描述，建议设置为5次/秒
 
 ## AWS
 - 接口 
@@ -41,7 +45,7 @@ mysql -ucloud_bill -h your_host  -p cloud_bill  < cloud_bill.sql
 - [参考资料](https://aws.github.io/aws-sdk-go-v2/docs/code-examples/)
 - [参考资料](https://pkg.go.dev/github.com/aws/aws-sdk-go-v2)
 - [参考资料](https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_GetCostAndUsage.html#API_GetCostAndUsage_RequestParameters)
-
+- 请求频率限制 未找到文档描述，建议设置为5次/秒
 
 ## 操作步骤
 1. 使用init-db.sql 初始化数据库

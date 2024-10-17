@@ -49,6 +49,9 @@ func GetUCloudBill(month string, account CloudAccount) ([]ubill.BillDetailItem, 
 		if total == 0 || *offset >= *ucloud.Int(total) {
 			break
 		}
+
+		//防止请求超过云平台的限制
+		sleepForFraction(account.FetchPerSecond)
 	}
 
 	fmt.Printf("%s %s Ucloud Total: %d\n", month, account.MainAccountID, len(resourceSummarySet))
