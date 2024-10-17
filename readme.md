@@ -54,7 +54,7 @@ mysql -ucloud_bill -h your_host  -p cloud_bill  < cloud_bill.sql
 3. 执行同步程序
 
 ## 参数说明
-- cloud-bill 不带参数，默认同步上个月份
+- cloud-bill -s "" 同步上个月份
 - cloud-bill -s 2024-07 同步指定单个月份
 - cloud-bill -s 2024-07 -e 2024-08 同步指定多个月份
 

@@ -19,6 +19,11 @@ var RootCmd = &cobra.Command{
 	Use:   "cloud-bill",
 	Short: "sync bill data from cloud providers to local database",
 	RunE: func(cmd *cobra.Command, args []string) error {
+
+		if startMonth == "" {
+			startMonth = getLastMonth()
+		}
+
 		if endMonth == "" {
 			endMonth = startMonth
 		}
@@ -89,7 +94,8 @@ func init() {
 		panic(err)
 	}
 
-	RootCmd.Flags().StringVarP(&startMonth, "start-month", "s", getLastMonth(), "Specify the start-month (e.g., YYYY-MM), default is last month")
+	RootCmd.Flags().StringVarP(&startMonth, "start-month", "s", getLastMonth(), "Specify the start-month (e.g., YYYY-MM), if set to an empty string, for example, \"\", the value will be the last month")
+	RootCmd.MarkFlagRequired("start-month")
 	RootCmd.Flags().StringVarP(&endMonth, "end-month", "e", "", "Specify the end-month (e.g., YYYY-MM), default is same as start-month")
 
 }
