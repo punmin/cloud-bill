@@ -202,5 +202,7 @@ func SyncTencentBillToDB(month string, account CloudAccount) {
 	if err != nil {
 		panic(err)
 	}
-	SaveTencentBillToDB(resourceSummarySet)
+	if len(resourceSummarySet) > 0 {
+		SaveTencentBillToDB(resourceSummarySet)
+	}
 }

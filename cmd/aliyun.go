@@ -252,5 +252,7 @@ func SyncAliyunBillToDB(month string, account CloudAccount) {
 	if err != nil {
 		panic(err)
 	}
-	SaveAliyunBillToDB(month, resourceSummarySet)
+	if len(resourceSummarySet) > 0 {
+		SaveAliyunBillToDB(month, resourceSummarySet)
+	}
 }

@@ -163,5 +163,7 @@ func SyncUCloudBillToDB(month string, account CloudAccount) {
 	if err != nil {
 		panic(err)
 	}
-	SaveUCloudBillToDB(account, month, resourceSummarySet)
+	if len(resourceSummarySet) > 0 {
+		SaveUCloudBillToDB(account, month, resourceSummarySet)
+	}
 }
