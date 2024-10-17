@@ -46,7 +46,7 @@ mysql -ucloud_bill -h your_host  -p cloud_bill  < cloud_bill.sql
 - [参考资料](https://pkg.go.dev/github.com/aws/aws-sdk-go-v2)
 - [参考资料](https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_GetCostAndUsage.html#API_GetCostAndUsage_RequestParameters)
 - 请求频率限制 未找到文档描述，建议设置为5次/秒
-- 默认支持最近14个月，超过14个月的历史数据，需要做以下设置：账单与成本管理>首选项和设置>成本管理首选项>Cost Explorer > 勾选每月粒度的多年数据（最多48小时生效）
+- 默认支持最近14个月，超过14个月的历史数据(最多38个月)，需要做以下设置：账单与成本管理>首选项和设置>成本管理首选项>Cost Explorer > 勾选每月粒度的多年数据（最多48小时生效）
 
 ## 操作步骤
 1. 使用init-db.sql 初始化数据库
