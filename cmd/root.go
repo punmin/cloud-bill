@@ -94,7 +94,7 @@ func init() {
 		panic(err)
 	}
 
-	RootCmd.Flags().StringVarP(&startMonth, "start-month", "s", getLastMonth(), "Specify the start-month (e.g., YYYY-MM), if set to an empty string, for example, \"\", the value will be the last month")
+	RootCmd.Flags().StringVarP(&startMonth, "start-month", "s", "", "Specify the start-month (e.g., YYYY-MM), if set to an empty string, for example, \"\", the value will be the last month")
 	RootCmd.MarkFlagRequired("start-month")
 	RootCmd.Flags().StringVarP(&endMonth, "end-month", "e", "", "Specify the end-month (e.g., YYYY-MM), default is same as start-month")
 
