@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `aliyun_bill_resource_summary` (
   `item_name` varchar(20) NULL COMMENT '项目名称',
   `list_price` decimal(18,8) NULL COMMENT '单价',
   `list_price_unit` varchar(20) NULL COMMENT '单价单位',
-  `nick_name` varchar(50) NULL COMMENT '实例昵称',
+  `nick_name` varchar(200) NULL COMMENT '实例昵称',
   `outstanding_amount` decimal(18,8) NULL COMMENT '未结清金额',
   `owner_id` varchar(50) NULL COMMENT '资源Owner账号',
   `payment_amount` decimal(18,8) NULL COMMENT '现金支付（含信用额度退款抵扣）',
@@ -53,10 +53,7 @@ CREATE TABLE IF NOT EXISTS `aliyun_bill_resource_summary` (
   `usage_unit` varchar(20) NULL COMMENT '用量单位',
   `zone` varchar(50) NULL COMMENT '可用区',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_bill_id` (`bill_month`,`bill_account_id`,`product_code`,`product_detail`,`instance_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- CREATE UNIQUE INDEX idx_bill_id ON aliyun_bill_resource_summary (`bill_month`,`bill_account_id`,`product_code`,`product_detail`,`instance_id`);
 
 
 CREATE TABLE IF NOT EXISTS `tencent_bill_resource_summary` (
@@ -100,10 +97,7 @@ CREATE TABLE IF NOT EXISTS `tencent_bill_resource_summary` (
   `voucher_pay_amount` decimal(18,8) NULL COMMENT '优惠券支出：使用各类优惠券（如代金券、现金券等）支付的金额',
   `zone_name` varchar(50) NULL COMMENT '可用区：资源所属可用区，如广州三区',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_bill_id` (`bill_month`,`payer_uin`,`business_code`,`product_code`,`resource_id`,`order_id`,`config_desc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- CREATE UNIQUE INDEX idx_bill_id ON tencent_bill_resource_summary (`bill_month`,`payer_uin`,`business_code`,`product_code`,`resource_id`,`order_id`,`config_desc`);
 
 
 CREATE TABLE IF NOT EXISTS `ucloud_bill_resource_summary` (

@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
+	"github.com/liqiongfan/leopards"
 )
 
 type AWSBill struct {
@@ -138,7 +139,35 @@ func SaveAWSBillToDB(account CloudAccount, billMonth string, resourceSummarySet 
 		panic(err2)
 	}
 }
+
+func HasAWSBill(billMonth string, account CloudAccount) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
+	defer cancel()
+
+	var result = struct {
+		Count int `json:"count"`
+	}{}
+
+	err := db.Query().From("aws_bill_resource_summary").Select(leopards.As(leopards.Count(`id`), `count`)).Where(
+		leopards.And(
+			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
+			leopards.EQ(`bill_account_id`, account.MainAccountID),
+		),
+	).Scan(ctx, &result)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return result.Count > 0
+
+}
 func SyncAWSBillToDB(month string, account CloudAccount) {
+	if HasAWSBill(month, account) {
+		fmt.Printf("%s bill for %s has been synced\n", account.AccountAliasName, month)
+		return
+	}
+
 	resourceSummarySet, err := GetAWSBill(month, account)
 	if err != nil {
 		panic(err)

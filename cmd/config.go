@@ -7,6 +7,7 @@ type DatabaseConfig struct {
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	DBName   string `mapstructure:"dbname"`
+	Debug    bool   `mapstructure:"debug"`
 }
 
 // CloudAccount 代表云账户配置

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/liqiongfan/leopards"
 	billing "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/billing/v20180709"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
@@ -165,7 +166,35 @@ func SaveTencentBillToDB(resourceSummarySet []*billing.BillResourceSummary) {
 	}
 }
 
+func HasTencentBill(billMonth string, account CloudAccount) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
+	defer cancel()
+
+	var result = struct {
+		Count int `json:"count"`
+	}{}
+
+	err := db.Query().From("tencent_bill_resource_summary").Select(leopards.As(leopards.Count(`id`), `count`)).Where(
+		leopards.And(
+			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
+			leopards.EQ(`owner_uin`, account.MainAccountID),
+		),
+	).Scan(ctx, &result)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return result.Count > 0
+
+}
+
 func SyncTencentBillToDB(month string, account CloudAccount) {
+	if HasTencentBill(month, account) {
+		fmt.Printf("%s bill for %s has been synced\n", account.AccountAliasName, month)
+		return
+	}
+
 	resourceSummarySet, err := GetTencentBill(month, account)
 	if err != nil {
 		panic(err)

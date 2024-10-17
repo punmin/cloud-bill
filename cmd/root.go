@@ -82,7 +82,7 @@ func init() {
 		Host:     appConfig.Database.Host,
 		Port:     appConfig.Database.Port,
 		Database: appConfig.Database.DBName,
-		Debug:    false, // 是否开启调试，开启调试会输出SQL到标准输出
+		Debug:    appConfig.Database.Debug, // 是否开启调试，开启调试会输出SQL到标准输出
 		Dialect:  leopards.MySQL,
 	}.Open()
 	if err != nil {

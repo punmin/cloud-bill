@@ -4,7 +4,7 @@ database:
   user: your_user
   password: your_password
   dbname: cloud_bill
-
+  debug: false
 
 usd_to_cny_exchange_rate: 7.0
 
