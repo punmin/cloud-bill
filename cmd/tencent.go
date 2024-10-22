@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/liqiongfan/leopards"
 	billing "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/billing/v20180709"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
@@ -20,10 +19,7 @@ const (
 	TencentMainAccountIDFieldName = "owner_uin"
 )
 
-type TencentCloudOperation struct {
-	BillTableName          string
-	MainAccountIDFieldName string
-}
+type TencentCloudOperation struct{}
 
 func StringTags(tags []*billing.BillTagInfo) string {
 	tagsJSON, err := json.Marshal(tags)
@@ -87,7 +83,7 @@ func (cloud *TencentCloudOperation) SaveBill(billMonth string, account CloudAcco
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	batchInsert := db.Insert().Table(cloud.BillTableName).
+	batchInsert := db.Insert().Table(TencentBillTableName).
 		Columns(
 			"bill_month",
 			"tags",
@@ -182,34 +178,12 @@ func (cloud *TencentCloudOperation) SaveBill(billMonth string, account CloudAcco
 }
 
 func (cloud *TencentCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
-	defer cancel()
-
-	var result = struct {
-		Count int `json:"count"`
-	}{}
-
-	err := db.Query().From(cloud.BillTableName).Select(leopards.As(leopards.Count(`id`), `count`)).Where(
-		leopards.And(
-			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
-			leopards.EQ(cloud.MainAccountIDFieldName, account.MainAccountID),
-		),
-	).Scan(ctx, &result)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return result.Count > 0
-
+	return HasBill(billMonth, account, TencentBillTableName, TencentMainAccountIDFieldName)
 }
 
 func SyncTencentBillToDB(billMonth string, account CloudAccount) {
 	operation := CommonBillOperation[*billing.BillResourceSummary]{
-		BillOperation: &TencentCloudOperation{
-			BillTableName:          TencentBillTableName,
-			MainAccountIDFieldName: TencentMainAccountIDFieldName,
-		},
+		BillOperation: &TencentCloudOperation{},
 	}
 	operation.SyncBill(billMonth, account)
 }

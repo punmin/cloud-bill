@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
-	"github.com/liqiongfan/leopards"
 )
 
 const (
@@ -21,10 +20,7 @@ const (
 	AWSMainAccountIDFieldName = "bill_account_id"
 )
 
-type AWSCloudOperation struct {
-	BillTableName          string
-	MainAccountIDFieldName string
-}
+type AWSCloudOperation struct{}
 
 type AWSBill struct {
 	Service       string
@@ -122,7 +118,7 @@ func (cloud *AWSCloudOperation) SaveBill(billMonth string, account CloudAccount,
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	batchInsert := db.Insert().Table(cloud.BillTableName).
+	batchInsert := db.Insert().Table(AWSBillTableName).
 		Columns(
 			"bill_month",
 			"service",
@@ -156,33 +152,11 @@ func (cloud *AWSCloudOperation) SaveBill(billMonth string, account CloudAccount,
 }
 
 func (cloud *AWSCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
-	defer cancel()
-
-	var result = struct {
-		Count int `json:"count"`
-	}{}
-
-	err := db.Query().From(cloud.BillTableName).Select(leopards.As(leopards.Count(`id`), `count`)).Where(
-		leopards.And(
-			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
-			leopards.EQ(cloud.MainAccountIDFieldName, account.MainAccountID),
-		),
-	).Scan(ctx, &result)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return result.Count > 0
-
+	return HasBill(billMonth, account, AWSBillTableName, AWSMainAccountIDFieldName)
 }
 func SyncAWSBillToDB(billMonth string, account CloudAccount) {
 	operation := CommonBillOperation[*AWSBill]{
-		BillOperation: &AWSCloudOperation{
-			BillTableName:          AWSBillTableName,
-			MainAccountIDFieldName: AWSMainAccountIDFieldName,
-		},
+		BillOperation: &AWSCloudOperation{},
 	}
 	operation.SyncBill(billMonth, account)
 }

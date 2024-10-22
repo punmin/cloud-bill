@@ -10,7 +10,6 @@ import (
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/liqiongfan/leopards"
 )
 
 const (
@@ -20,10 +19,7 @@ const (
 	AliyunMainAccountIDFieldName = "bill_account_id"
 )
 
-type AliyunCloudOperation struct {
-	BillTableName          string
-	MainAccountIDFieldName string
-}
+type AliyunCloudOperation struct{}
 
 func CreateClient(access_key_id string, access_key_secret string) (_result *bssopenapi20171214.Client, _err error) {
 	config := &openapi.Config{
@@ -84,7 +80,7 @@ func (cloud *AliyunCloudOperation) SaveBill(billMonth string, account CloudAccou
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	batchInsert := db.Insert().Table(cloud.BillTableName).
+	batchInsert := db.Insert().Table(AliyunBillTableName).
 		Columns(
 			"bill_month",
 			"adjust_amount",
@@ -223,34 +219,12 @@ func (cloud *AliyunCloudOperation) SaveBill(billMonth string, account CloudAccou
 }
 
 func (cloud *AliyunCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
-	defer cancel()
-
-	var result = struct {
-		Count int `json:"count"`
-	}{}
-
-	err := db.Query().From(cloud.BillTableName).Select(leopards.As(leopards.Count(`id`), `count`)).Where(
-		leopards.And(
-			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
-			leopards.EQ(cloud.MainAccountIDFieldName, account.MainAccountID),
-		),
-	).Scan(ctx, &result)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return result.Count > 0
-
+	return HasBill(billMonth, account, AliyunBillTableName, AliyunMainAccountIDFieldName)
 }
 
 func SyncAliyunBillToDB(billMonth string, account CloudAccount) {
 	operation := CommonBillOperation[*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems]{
-		BillOperation: &AliyunCloudOperation{
-			BillTableName:          AliyunBillTableName,
-			MainAccountIDFieldName: AliyunMainAccountIDFieldName,
-		},
+		BillOperation: &AliyunCloudOperation{},
 	}
 	operation.SyncBill(billMonth, account)
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/liqiongfan/leopards"
 	"github.com/ucloud/ucloud-sdk-go/services/ubill"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
@@ -18,10 +17,7 @@ const (
 	UCloudMainAccountIDFieldName = "bill_account_id"
 )
 
-type UCloudCloudOperation struct {
-	BillTableName          string
-	MainAccountIDFieldName string
-}
+type UCloudCloudOperation struct{}
 
 func (cloud *UCloudCloudOperation) GetBill(billMonth string, account CloudAccount) ([]ubill.BillDetailItem, error) {
 	cfg := ucloud.NewConfig()
@@ -76,7 +72,7 @@ func (cloud *UCloudCloudOperation) SaveBill(billMonth string, account CloudAccou
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	batchInsert := db.Insert().Table(cloud.BillTableName).
+	batchInsert := db.Insert().Table(UCloudBillTableName).
 		Columns(
 			"bill_month",
 			"admin",
@@ -144,34 +140,12 @@ func (cloud *UCloudCloudOperation) SaveBill(billMonth string, account CloudAccou
 }
 
 func (cloud *UCloudCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
-	defer cancel()
-
-	var result = struct {
-		Count int `json:"count"`
-	}{}
-
-	err := db.Query().From(cloud.BillTableName).Select(leopards.As(leopards.Count(`id`), `count`)).Where(
-		leopards.And(
-			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
-			leopards.EQ(cloud.MainAccountIDFieldName, account.MainAccountID),
-		),
-	).Scan(ctx, &result)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return result.Count > 0
-
+	return HasBill(billMonth, account, UCloudBillTableName, UCloudMainAccountIDFieldName)
 }
 
 func SyncUCloudBillToDB(billMonth string, account CloudAccount) {
 	operation := CommonBillOperation[ubill.BillDetailItem]{
-		BillOperation: &UCloudCloudOperation{
-			BillTableName:          UCloudBillTableName,
-			MainAccountIDFieldName: UCloudMainAccountIDFieldName,
-		},
+		BillOperation: &UCloudCloudOperation{},
 	}
 	operation.SyncBill(billMonth, account)
 }
