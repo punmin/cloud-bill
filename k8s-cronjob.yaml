@@ -1,0 +1,90 @@
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloud-bill
+  namespace: default
+data:
+  config.yaml: |
+    database:
+      host: your_host
+      port: 3306
+      user: your_user
+      password: your_password
+      dbname: cloud_bill
+      debug: false
+
+    usd_to_cny_exchange_rate: 7.0
+
+    cloud:
+      - account_alias_name: your_account_alias_name
+        cloud_provider: tencent
+        fetch_per_second: 5
+        main_account_id: your_main_account_id
+        access_key_id: your_key_id
+        access_key_secret: your_key_secret
+        enabled: true
+      - account_alias_name: your_account_alias_name2
+        cloud_provider: tencent
+        fetch_per_second: 5
+        main_account_id: your_main_account_id2
+        access_key_id: your_key_id2
+        access_key_secret: your_key_secret2
+        enabled: false
+      - account_alias_name: your_account_alias_name
+        cloud_provider: aliyun
+        fetch_per_second: 10
+        main_account_id: your_main_account_id
+        access_key_id: your_key_id
+        access_key_secret: your_key_secret
+        enabled: true
+      - account_alias_name: your_account_alias_name
+        cloud_provider: ucloud
+        fetch_per_second: 5
+        main_account_id: your_main_account_id
+        access_key_id: your_key_id
+        access_key_secret: your_key_secret
+        enabled: true
+      - account_alias_name: your_account_alias_name
+        cloud_provider: aws
+        fetch_per_second: 5
+        main_account_id: your_main_account_id
+        access_key_id: your_key_id
+        access_key_secret: your_key_secret
+        enabled: true
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cloud-bill
+  namespace: default
+spec:
+  schedule: "0 3 6 * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  suspend: true
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      template:
+        spec:
+          containers:
+          - name: app
+            image: cloud-bill:latest
+            command: ["./cloud-bill"]
+            args: ["-s", "last"]
+            volumeMounts:
+              - mountPath: /app/config.yaml
+                name: project-config
+                subPath: config.yaml
+          restartPolicy: Never
+          volumes:
+          - name: project-config
+            configMap:
+              defaultMode: 420
+              name: cloud-bill
+
