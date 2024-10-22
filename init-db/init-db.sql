@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS `aliyun_bill_resource_summary` (
   `usage_unit` varchar(20) NULL COMMENT '用量单位',
   `zone` varchar(50) NULL COMMENT '可用区',
   PRIMARY KEY (`id`),
+  INDEX `idx_bill_month_account` (`bill_month`,`bill_account_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -97,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `tencent_bill_resource_summary` (
   `voucher_pay_amount` decimal(18,8) NULL COMMENT '优惠券支出：使用各类优惠券（如代金券、现金券等）支付的金额',
   `zone_name` varchar(50) NULL COMMENT '可用区：资源所属可用区，如广州三区',
   PRIMARY KEY (`id`),
+  INDEX `idx_bill_month_account` (`bill_month`,`owner_uin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -125,7 +127,8 @@ CREATE TABLE IF NOT EXISTS `ucloud_bill_resource_summary` (
   `user_email` varchar(50) NULL COMMENT '账户邮箱',
   `user_name` varchar(50) NULL COMMENT '账户名',
   `bill_account_id` varchar(50) NULL COMMENT '账单所属账号ID',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_bill_month_account` (`bill_month`,`bill_account_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -137,7 +140,8 @@ CREATE TABLE IF NOT EXISTS `aws_bill_resource_summary` (
   `unblended_cost` decimal(18,8) NULL COMMENT '未混合成本(美元)',
   `exchange_rate` decimal(8,4) NOT NULL COMMENT '汇率，非aws提供，仅供参考',
   `bill_account_id` varchar(50) NULL COMMENT '账单所属账号ID',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX `idx_bill_month_account` (`bill_month`,`bill_account_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
