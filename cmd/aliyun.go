@@ -13,16 +13,19 @@ import (
 	"github.com/liqiongfan/leopards"
 )
 
-// Description:
-//
-// 使用AK&SK初始化账号Client
-//
-// @return Client
-//
-// @throws Exception
+const (
+	//Aliyun月账单表名
+	AliyunBillTableName = "aliyun_bill_resource_summary"
+	//Aliyun月账单归属账号的字段名字
+	AliyunMainAccountIDFieldName = "bill_account_id"
+)
+
+type AliyunCloudOperation struct {
+	BillTableName          string
+	MainAccountIDFieldName string
+}
+
 func CreateClient(access_key_id string, access_key_secret string) (_result *bssopenapi20171214.Client, _err error) {
-	// 工程代码泄露可能会导致 AccessKey 泄露，并威胁账号下所有资源的安全性。以下代码示例仅供参考。
-	// 建议使用更安全的 STS 方式，更多鉴权访问方式请参见：https://help.aliyun.com/document_detail/378661.html。
 	config := &openapi.Config{
 		AccessKeyId:     tea.String(access_key_id),
 		AccessKeySecret: tea.String(access_key_secret),
@@ -34,14 +37,14 @@ func CreateClient(access_key_id string, access_key_secret string) (_result *bsso
 	return _result, _err
 }
 
-func GetAliyunBill(month string, account CloudAccount) ([]*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems, error) {
+func (cloud *AliyunCloudOperation) GetBill(billMonth string, account CloudAccount) ([]*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems, error) {
 	client, _err := CreateClient(account.AccessKeyID, account.AccessKeySecret)
 	if _err != nil {
 		return nil, fmt.Errorf("client error has returned: %w", _err)
 	}
 
 	describeInstanceBillRequest := &bssopenapi20171214.DescribeInstanceBillRequest{
-		BillingCycle:  tea.String(month),
+		BillingCycle:  tea.String(billMonth),
 		IsBillingItem: tea.Bool(false),
 		MaxResults:    tea.Int32(300),
 	}
@@ -70,18 +73,18 @@ func GetAliyunBill(month string, account CloudAccount) ([]*bssopenapi20171214.De
 		sleepForFraction(account.FetchPerSecond)
 	}
 
-	fmt.Printf("%s %s Aliyun Total: %d\n", month, account.MainAccountID, len(resourceSummarySet))
+	fmt.Printf("%s %s Aliyun Total: %d\n", billMonth, account.MainAccountID, len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 
 }
 
-func SaveAliyunBillToDB(billMonth string, resourceSummarySet []*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems) {
+func (cloud *AliyunCloudOperation) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	batchInsert := db.Insert().Table("aliyun_bill_resource_summary").
+	batchInsert := db.Insert().Table(cloud.BillTableName).
 		Columns(
 			"bill_month",
 			"adjust_amount",
@@ -219,7 +222,7 @@ func SaveAliyunBillToDB(billMonth string, resourceSummarySet []*bssopenapi201712
 	}
 }
 
-func HasAliyunBill(billMonth string, account CloudAccount) bool {
+func (cloud *AliyunCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -227,10 +230,10 @@ func HasAliyunBill(billMonth string, account CloudAccount) bool {
 		Count int `json:"count"`
 	}{}
 
-	err := db.Query().From("aliyun_bill_resource_summary").Select(leopards.As(leopards.Count(`id`), `count`)).Where(
+	err := db.Query().From(cloud.BillTableName).Select(leopards.As(leopards.Count(`id`), `count`)).Where(
 		leopards.And(
 			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
-			leopards.EQ(`bill_account_id`, account.MainAccountID),
+			leopards.EQ(cloud.MainAccountIDFieldName, account.MainAccountID),
 		),
 	).Scan(ctx, &result)
 
@@ -242,17 +245,12 @@ func HasAliyunBill(billMonth string, account CloudAccount) bool {
 
 }
 
-func SyncAliyunBillToDB(month string, account CloudAccount) {
-	if HasAliyunBill(month, account) {
-		fmt.Printf("%s bill for %s has been synced\n", account.AccountAliasName, month)
-		return
+func SyncAliyunBillToDB(billMonth string, account CloudAccount) {
+	operation := CommonBillOperation[*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems]{
+		BillOperation: &AliyunCloudOperation{
+			BillTableName:          AliyunBillTableName,
+			MainAccountIDFieldName: AliyunMainAccountIDFieldName,
+		},
 	}
-
-	resourceSummarySet, err := GetAliyunBill(month, account)
-	if err != nil {
-		panic(err)
-	}
-	if len(resourceSummarySet) > 0 {
-		SaveAliyunBillToDB(month, resourceSummarySet)
-	}
+	operation.SyncBill(billMonth, account)
 }

@@ -13,6 +13,18 @@ import (
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 )
 
+const (
+	//Tencent月账单表名
+	TencentBillTableName = "tencent_bill_resource_summary"
+	//Tencent月账单归属账号的字段名字
+	TencentMainAccountIDFieldName = "owner_uin"
+)
+
+type TencentCloudOperation struct {
+	BillTableName          string
+	MainAccountIDFieldName string
+}
+
 func StringTags(tags []*billing.BillTagInfo) string {
 	tagsJSON, err := json.Marshal(tags)
 	if err != nil {
@@ -21,7 +33,7 @@ func StringTags(tags []*billing.BillTagInfo) string {
 	return string(tagsJSON)
 }
 
-func GetTencentBill(month string, account CloudAccount) ([]*billing.BillResourceSummary, error) {
+func (cloud *TencentCloudOperation) GetBill(billMonth string, account CloudAccount) ([]*billing.BillResourceSummary, error) {
 	credential := common.NewCredential(account.AccessKeyID, account.AccessKeySecret)
 	cpf := profile.NewClientProfile()
 	cpf.HttpProfile.Endpoint = "billing.tencentcloudapi.com"
@@ -31,7 +43,7 @@ func GetTencentBill(month string, account CloudAccount) ([]*billing.BillResource
 	}
 
 	request := billing.NewDescribeBillResourceSummaryRequest()
-	request.Month = common.StringPtr(month)
+	request.Month = common.StringPtr(billMonth)
 	request.Limit = common.Uint64Ptr(1000)
 	request.NeedRecordNum = common.Int64Ptr(1)
 
@@ -66,16 +78,16 @@ func GetTencentBill(month string, account CloudAccount) ([]*billing.BillResource
 		sleepForFraction(account.FetchPerSecond)
 	}
 
-	fmt.Printf("%s %s Tencent Total: %d\n", month, account.MainAccountID, len(resourceSummarySet))
+	fmt.Printf("%s %s Tencent Total: %d\n", billMonth, account.MainAccountID, len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 }
 
-func SaveTencentBillToDB(resourceSummarySet []*billing.BillResourceSummary) {
+func (cloud *TencentCloudOperation) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []*billing.BillResourceSummary) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	batchInsert := db.Insert().Table("tencent_bill_resource_summary").
+	batchInsert := db.Insert().Table(cloud.BillTableName).
 		Columns(
 			"bill_month",
 			"tags",
@@ -169,7 +181,7 @@ func SaveTencentBillToDB(resourceSummarySet []*billing.BillResourceSummary) {
 	}
 }
 
-func HasTencentBill(billMonth string, account CloudAccount) bool {
+func (cloud *TencentCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -177,10 +189,10 @@ func HasTencentBill(billMonth string, account CloudAccount) bool {
 		Count int `json:"count"`
 	}{}
 
-	err := db.Query().From("tencent_bill_resource_summary").Select(leopards.As(leopards.Count(`id`), `count`)).Where(
+	err := db.Query().From(cloud.BillTableName).Select(leopards.As(leopards.Count(`id`), `count`)).Where(
 		leopards.And(
 			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
-			leopards.EQ(`owner_uin`, account.MainAccountID),
+			leopards.EQ(cloud.MainAccountIDFieldName, account.MainAccountID),
 		),
 	).Scan(ctx, &result)
 
@@ -192,17 +204,12 @@ func HasTencentBill(billMonth string, account CloudAccount) bool {
 
 }
 
-func SyncTencentBillToDB(month string, account CloudAccount) {
-	if HasTencentBill(month, account) {
-		fmt.Printf("%s bill for %s has been synced\n", account.AccountAliasName, month)
-		return
+func SyncTencentBillToDB(billMonth string, account CloudAccount) {
+	operation := CommonBillOperation[*billing.BillResourceSummary]{
+		BillOperation: &TencentCloudOperation{
+			BillTableName:          TencentBillTableName,
+			MainAccountIDFieldName: TencentMainAccountIDFieldName,
+		},
 	}
-
-	resourceSummarySet, err := GetTencentBill(month, account)
-	if err != nil {
-		panic(err)
-	}
-	if len(resourceSummarySet) > 0 {
-		SaveTencentBillToDB(resourceSummarySet)
-	}
+	operation.SyncBill(billMonth, account)
 }

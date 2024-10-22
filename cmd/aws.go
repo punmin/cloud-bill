@@ -14,6 +14,18 @@ import (
 	"github.com/liqiongfan/leopards"
 )
 
+const (
+	//AWS月账单表名
+	AWSBillTableName = "aws_bill_resource_summary"
+	//AWS月账单归属账号的字段名字
+	AWSMainAccountIDFieldName = "bill_account_id"
+)
+
+type AWSCloudOperation struct {
+	BillTableName          string
+	MainAccountIDFieldName string
+}
+
 type AWSBill struct {
 	Service       string
 	Region        string
@@ -36,7 +48,7 @@ func GetAWSTimePeriod(month string) (string, string) {
 	return month + "-01", next.Format("2006-01") + "-01"
 }
 
-func GetAWSBill(month string, account CloudAccount) ([]*AWSBill, error) {
+func (cloud *AWSCloudOperation) GetBill(billMonth string, account CloudAccount) ([]*AWSBill, error) {
 	exchange_rate := appConfig.UsdToCnyExchangeRate
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion("us-west-2"),
@@ -50,7 +62,7 @@ func GetAWSBill(month string, account CloudAccount) ([]*AWSBill, error) {
 	svc := costexplorer.NewFromConfig(cfg)
 
 	// 设置查询时间范围
-	start, end := GetAWSTimePeriod(month)
+	start, end := GetAWSTimePeriod(billMonth)
 	resourceSummarySet := make([]*AWSBill, 0)
 
 	// 创建 GetCostAndUsageInput 请求
@@ -101,16 +113,16 @@ func GetAWSBill(month string, account CloudAccount) ([]*AWSBill, error) {
 		sleepForFraction(account.FetchPerSecond)
 	}
 
-	fmt.Printf("%s %s AWS Total: %d\n", month, account.MainAccountID, len(resourceSummarySet))
+	fmt.Printf("%s %s AWS Total: %d\n", billMonth, account.MainAccountID, len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 }
 
-func SaveAWSBillToDB(account CloudAccount, billMonth string, resourceSummarySet []*AWSBill) {
+func (cloud *AWSCloudOperation) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []*AWSBill) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	batchInsert := db.Insert().Table("aws_bill_resource_summary").
+	batchInsert := db.Insert().Table(cloud.BillTableName).
 		Columns(
 			"bill_month",
 			"service",
@@ -143,7 +155,7 @@ func SaveAWSBillToDB(account CloudAccount, billMonth string, resourceSummarySet 
 	}
 }
 
-func HasAWSBill(billMonth string, account CloudAccount) bool {
+func (cloud *AWSCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -151,10 +163,10 @@ func HasAWSBill(billMonth string, account CloudAccount) bool {
 		Count int `json:"count"`
 	}{}
 
-	err := db.Query().From("aws_bill_resource_summary").Select(leopards.As(leopards.Count(`id`), `count`)).Where(
+	err := db.Query().From(cloud.BillTableName).Select(leopards.As(leopards.Count(`id`), `count`)).Where(
 		leopards.And(
 			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
-			leopards.EQ(`bill_account_id`, account.MainAccountID),
+			leopards.EQ(cloud.MainAccountIDFieldName, account.MainAccountID),
 		),
 	).Scan(ctx, &result)
 
@@ -165,18 +177,12 @@ func HasAWSBill(billMonth string, account CloudAccount) bool {
 	return result.Count > 0
 
 }
-func SyncAWSBillToDB(month string, account CloudAccount) {
-	if HasAWSBill(month, account) {
-		fmt.Printf("%s bill for %s has been synced\n", account.AccountAliasName, month)
-		return
+func SyncAWSBillToDB(billMonth string, account CloudAccount) {
+	operation := CommonBillOperation[*AWSBill]{
+		BillOperation: &AWSCloudOperation{
+			BillTableName:          AWSBillTableName,
+			MainAccountIDFieldName: AWSMainAccountIDFieldName,
+		},
 	}
-
-	resourceSummarySet, err := GetAWSBill(month, account)
-	if err != nil {
-		panic(err)
-	}
-
-	if len(resourceSummarySet) > 0 {
-		SaveAWSBillToDB(account, month, resourceSummarySet)
-	}
+	operation.SyncBill(billMonth, account)
 }

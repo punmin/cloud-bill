@@ -11,7 +11,19 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
 )
 
-func GetUCloudBill(month string, account CloudAccount) ([]ubill.BillDetailItem, error) {
+const (
+	//Ucloud月账单表名
+	UCloudBillTableName = "ucloud_bill_resource_summary"
+	//Ucloud月账单归属账号的字段名字
+	UCloudMainAccountIDFieldName = "bill_account_id"
+)
+
+type UCloudCloudOperation struct {
+	BillTableName          string
+	MainAccountIDFieldName string
+}
+
+func (cloud *UCloudCloudOperation) GetBill(billMonth string, account CloudAccount) ([]ubill.BillDetailItem, error) {
 	cfg := ucloud.NewConfig()
 	cfg.Region = "cn-gd"
 
@@ -23,7 +35,7 @@ func GetUCloudBill(month string, account CloudAccount) ([]ubill.BillDetailItem, 
 
 	req := ubillClient.NewListUBillDetailRequest()
 	// 设置请求参数
-	req.BillingCycle = ucloud.String(month)
+	req.BillingCycle = ucloud.String(billMonth)
 	req.Limit = ucloud.Int(100)
 
 	offset := ucloud.Int(0)
@@ -54,17 +66,17 @@ func GetUCloudBill(month string, account CloudAccount) ([]ubill.BillDetailItem, 
 		sleepForFraction(account.FetchPerSecond)
 	}
 
-	fmt.Printf("%s %s Ucloud Total: %d\n", month, account.MainAccountID, len(resourceSummarySet))
+	fmt.Printf("%s %s Ucloud Total: %d\n", billMonth, account.MainAccountID, len(resourceSummarySet))
 
 	return resourceSummarySet, nil
 
 }
 
-func SaveUCloudBillToDB(account CloudAccount, billMonth string, resourceSummarySet []ubill.BillDetailItem) {
+func (cloud *UCloudCloudOperation) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []ubill.BillDetailItem) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
-	batchInsert := db.Insert().Table("ucloud_bill_resource_summary").
+	batchInsert := db.Insert().Table(cloud.BillTableName).
 		Columns(
 			"bill_month",
 			"admin",
@@ -131,7 +143,7 @@ func SaveUCloudBillToDB(account CloudAccount, billMonth string, resourceSummaryS
 	}
 }
 
-func HasUcloudBill(billMonth string, account CloudAccount) bool {
+func (cloud *UCloudCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -139,10 +151,10 @@ func HasUcloudBill(billMonth string, account CloudAccount) bool {
 		Count int `json:"count"`
 	}{}
 
-	err := db.Query().From("ucloud_bill_resource_summary").Select(leopards.As(leopards.Count(`id`), `count`)).Where(
+	err := db.Query().From(cloud.BillTableName).Select(leopards.As(leopards.Count(`id`), `count`)).Where(
 		leopards.And(
 			leopards.EQ("bill_month", fmt.Sprintf("%s-01 00:00:00", billMonth)),
-			leopards.EQ(`bill_account_id`, account.MainAccountID),
+			leopards.EQ(cloud.MainAccountIDFieldName, account.MainAccountID),
 		),
 	).Scan(ctx, &result)
 
@@ -153,17 +165,13 @@ func HasUcloudBill(billMonth string, account CloudAccount) bool {
 	return result.Count > 0
 
 }
-func SyncUCloudBillToDB(month string, account CloudAccount) {
-	if HasUcloudBill(month, account) {
-		fmt.Printf("%s bill for %s has been synced\n", account.AccountAliasName, month)
-		return
-	}
 
-	resourceSummarySet, err := GetUCloudBill(month, account)
-	if err != nil {
-		panic(err)
+func SyncUCloudBillToDB(billMonth string, account CloudAccount) {
+	operation := CommonBillOperation[ubill.BillDetailItem]{
+		BillOperation: &UCloudCloudOperation{
+			BillTableName:          UCloudBillTableName,
+			MainAccountIDFieldName: UCloudMainAccountIDFieldName,
+		},
 	}
-	if len(resourceSummarySet) > 0 {
-		SaveUCloudBillToDB(account, month, resourceSummarySet)
-	}
+	operation.SyncBill(billMonth, account)
 }
