@@ -20,7 +20,7 @@ const (
 	AWSMainAccountIDFieldName = "bill_account_id"
 )
 
-type AWSCloudOperation struct{}
+type AWSBillHandler struct{}
 
 type AWSBill struct {
 	Service       string
@@ -44,7 +44,7 @@ func GetAWSTimePeriod(month string) (string, string) {
 	return month + "-01", next.Format("2006-01") + "-01"
 }
 
-func (cloud *AWSCloudOperation) GetBill(billMonth string, account CloudAccount) ([]*AWSBill, error) {
+func (handler *AWSBillHandler) GetBill(billMonth string, account CloudAccount) ([]*AWSBill, error) {
 	exchange_rate := appConfig.UsdToCnyExchangeRate
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion("us-west-2"),
@@ -114,7 +114,7 @@ func (cloud *AWSCloudOperation) GetBill(billMonth string, account CloudAccount) 
 	return resourceSummarySet, nil
 }
 
-func (cloud *AWSCloudOperation) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []*AWSBill) {
+func (handler *AWSBillHandler) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []*AWSBill) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -151,12 +151,12 @@ func (cloud *AWSCloudOperation) SaveBill(billMonth string, account CloudAccount,
 	}
 }
 
-func (cloud *AWSCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
+func (handler *AWSBillHandler) HasBill(billMonth string, account CloudAccount) bool {
 	return HasBill(billMonth, account, AWSBillTableName, AWSMainAccountIDFieldName)
 }
 func SyncAWSBillToDB(billMonth string, account CloudAccount) {
-	operation := CommonBillOperation[*AWSBill]{
-		BillOperation: &AWSCloudOperation{},
+	executor := CloudBillExecutor[*AWSBill]{
+		handler: &AWSBillHandler{},
 	}
-	operation.SyncBill(billMonth, account)
+	executor.SyncBill(billMonth, account)
 }

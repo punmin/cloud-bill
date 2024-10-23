@@ -19,7 +19,7 @@ const (
 	AliyunMainAccountIDFieldName = "bill_account_id"
 )
 
-type AliyunCloudOperation struct{}
+type AliyunBillHandler struct{}
 
 func CreateClient(access_key_id string, access_key_secret string) (_result *bssopenapi20171214.Client, _err error) {
 	config := &openapi.Config{
@@ -33,7 +33,7 @@ func CreateClient(access_key_id string, access_key_secret string) (_result *bsso
 	return _result, _err
 }
 
-func (cloud *AliyunCloudOperation) GetBill(billMonth string, account CloudAccount) ([]*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems, error) {
+func (handler *AliyunBillHandler) GetBill(billMonth string, account CloudAccount) ([]*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems, error) {
 	client, _err := CreateClient(account.AccessKeyID, account.AccessKeySecret)
 	if _err != nil {
 		return nil, fmt.Errorf("client error has returned: %w", _err)
@@ -75,7 +75,7 @@ func (cloud *AliyunCloudOperation) GetBill(billMonth string, account CloudAccoun
 
 }
 
-func (cloud *AliyunCloudOperation) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems) {
+func (handler *AliyunBillHandler) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
@@ -218,13 +218,13 @@ func (cloud *AliyunCloudOperation) SaveBill(billMonth string, account CloudAccou
 	}
 }
 
-func (cloud *AliyunCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
+func (handler *AliyunBillHandler) HasBill(billMonth string, account CloudAccount) bool {
 	return HasBill(billMonth, account, AliyunBillTableName, AliyunMainAccountIDFieldName)
 }
 
 func SyncAliyunBillToDB(billMonth string, account CloudAccount) {
-	operation := CommonBillOperation[*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems]{
-		BillOperation: &AliyunCloudOperation{},
+	executor := CloudBillExecutor[*bssopenapi20171214.DescribeInstanceBillResponseBodyDataItems]{
+		handler: &AliyunBillHandler{},
 	}
-	operation.SyncBill(billMonth, account)
+	executor.SyncBill(billMonth, account)
 }

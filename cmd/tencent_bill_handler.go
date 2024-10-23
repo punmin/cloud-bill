@@ -19,7 +19,7 @@ const (
 	TencentMainAccountIDFieldName = "owner_uin"
 )
 
-type TencentCloudOperation struct{}
+type TencentBillHandler struct{}
 
 func StringTags(tags []*billing.BillTagInfo) string {
 	tagsJSON, err := json.Marshal(tags)
@@ -29,7 +29,7 @@ func StringTags(tags []*billing.BillTagInfo) string {
 	return string(tagsJSON)
 }
 
-func (cloud *TencentCloudOperation) GetBill(billMonth string, account CloudAccount) ([]*billing.BillResourceSummary, error) {
+func (handler *TencentBillHandler) GetBill(billMonth string, account CloudAccount) ([]*billing.BillResourceSummary, error) {
 	credential := common.NewCredential(account.AccessKeyID, account.AccessKeySecret)
 	cpf := profile.NewClientProfile()
 	cpf.HttpProfile.Endpoint = "billing.tencentcloudapi.com"
@@ -79,7 +79,7 @@ func (cloud *TencentCloudOperation) GetBill(billMonth string, account CloudAccou
 	return resourceSummarySet, nil
 }
 
-func (cloud *TencentCloudOperation) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []*billing.BillResourceSummary) {
+func (handler *TencentBillHandler) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []*billing.BillResourceSummary) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -177,13 +177,13 @@ func (cloud *TencentCloudOperation) SaveBill(billMonth string, account CloudAcco
 	}
 }
 
-func (cloud *TencentCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
+func (handler *TencentBillHandler) HasBill(billMonth string, account CloudAccount) bool {
 	return HasBill(billMonth, account, TencentBillTableName, TencentMainAccountIDFieldName)
 }
 
 func SyncTencentBillToDB(billMonth string, account CloudAccount) {
-	operation := CommonBillOperation[*billing.BillResourceSummary]{
-		BillOperation: &TencentCloudOperation{},
+	executor := CloudBillExecutor[*billing.BillResourceSummary]{
+		handler: &TencentBillHandler{},
 	}
-	operation.SyncBill(billMonth, account)
+	executor.SyncBill(billMonth, account)
 }

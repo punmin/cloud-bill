@@ -17,9 +17,9 @@ const (
 	UCloudMainAccountIDFieldName = "bill_account_id"
 )
 
-type UCloudCloudOperation struct{}
+type UCloudBillHandler struct{}
 
-func (cloud *UCloudCloudOperation) GetBill(billMonth string, account CloudAccount) ([]ubill.BillDetailItem, error) {
+func (handler *UCloudBillHandler) GetBill(billMonth string, account CloudAccount) ([]ubill.BillDetailItem, error) {
 	cfg := ucloud.NewConfig()
 	cfg.Region = "cn-gd"
 
@@ -68,7 +68,7 @@ func (cloud *UCloudCloudOperation) GetBill(billMonth string, account CloudAccoun
 
 }
 
-func (cloud *UCloudCloudOperation) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []ubill.BillDetailItem) {
+func (handler *UCloudBillHandler) SaveBill(billMonth string, account CloudAccount, resourceSummarySet []ubill.BillDetailItem) {
 	ctx, cancel := context.WithTimeout(context.Background(), 300*time.Second)
 	defer cancel()
 
@@ -139,13 +139,13 @@ func (cloud *UCloudCloudOperation) SaveBill(billMonth string, account CloudAccou
 	}
 }
 
-func (cloud *UCloudCloudOperation) HasBill(billMonth string, account CloudAccount) bool {
+func (handler *UCloudBillHandler) HasBill(billMonth string, account CloudAccount) bool {
 	return HasBill(billMonth, account, UCloudBillTableName, UCloudMainAccountIDFieldName)
 }
 
 func SyncUCloudBillToDB(billMonth string, account CloudAccount) {
-	operation := CommonBillOperation[ubill.BillDetailItem]{
-		BillOperation: &UCloudCloudOperation{},
+	executor := CloudBillExecutor[ubill.BillDetailItem]{
+		handler: &UCloudBillHandler{},
 	}
-	operation.SyncBill(billMonth, account)
+	executor.SyncBill(billMonth, account)
 }
