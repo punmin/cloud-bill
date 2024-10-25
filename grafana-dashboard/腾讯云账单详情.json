@@ -87,8 +87,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 7,
+        "w": 24,
         "x": 0,
         "y": 1
       },
@@ -212,8 +212,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 1
+        "x": 0,
+        "y": 8
       },
       "id": 15,
       "interval": "1M",
@@ -271,12 +271,165 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSource}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "currencyJPY"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 18,
+      "interval": "1M",
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSource}"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select bill_month as \"time\",business_code_name,\r\nsum(voucher_pay_amount) as \"优惠券支出\"\r\nfrom tencent_bill_resource_summary\r\nwhere $__timeFilter(bill_month) and owner_uin = \"${bill_account}\"\r\ngroup by bill_month,business_code_name\r\norder by bill_month",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "aliyun_bill_resource_summary",
+          "timeColumn": "bill_month",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSource}"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select bill_month as \"time\",\r\nsum(voucher_pay_amount) as \"优惠券合计支出\"\r\nfrom tencent_bill_resource_summary\r\nwhere $__timeFilter(bill_month) and owner_uin = \"${bill_account}\"\r\ngroup by bill_month\r\norder by bill_month",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "aliyun_bill_resource_summary",
+          "timeColumn": "bill_month",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "云产品优惠券抵扣",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 16
       },
       "id": 14,
       "panels": [],
@@ -315,9 +468,9 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 20,
+        "w": 15,
         "x": 0,
-        "y": 10
+        "y": 17
       },
       "id": 2,
       "options": {
@@ -376,6 +529,97 @@
         "type": "mysql",
         "uid": "${DataSource}"
       },
+      "description": "优惠券支出：使用各类优惠券（如代金券、现金券等）支付的金额",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 15,
+        "y": 17
+      },
+      "id": 17,
+      "options": {
+        "displayMode": "basic",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "9.1.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSource}"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select bill_month as \"time\",sum(cash_pay_amount) as \"现金支出\",sum(voucher_pay_amount) as \"优惠券支出\" \r\nfrom tencent_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and owner_uin = \"${bill_account}\"\r\ngroup by bill_month",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "aliyun_bill_resource_summary",
+          "timeColumn": "bill_month",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "支出分类",
+      "transformations": [],
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSource}"
+      },
       "fieldConfig": {
         "defaults": {
           "mappings": [],
@@ -400,7 +644,7 @@
         "h": 3,
         "w": 4,
         "x": 20,
-        "y": 10
+        "y": 17
       },
       "id": 8,
       "options": {
@@ -484,7 +728,7 @@
         "h": 10,
         "w": 8,
         "x": 0,
-        "y": 13
+        "y": 20
       },
       "id": 3,
       "options": {
@@ -580,7 +824,7 @@
         "h": 10,
         "w": 8,
         "x": 8,
-        "y": 13
+        "y": 20
       },
       "id": 4,
       "options": {
@@ -676,7 +920,7 @@
         "h": 10,
         "w": 8,
         "x": 16,
-        "y": 13
+        "y": 20
       },
       "id": 5,
       "options": {
@@ -760,7 +1004,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -776,7 +1021,7 @@
         "h": 15,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 30
       },
       "id": 6,
       "options": {
@@ -867,7 +1112,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -968,7 +1214,7 @@
         "h": 15,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 45
       },
       "id": 7,
       "options": {
@@ -1063,7 +1309,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1188,7 +1435,7 @@
         "h": 15,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 60
       },
       "id": 16,
       "options": {
@@ -1309,7 +1556,7 @@
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "空",
           "value": "空"
         },
@@ -1341,6 +1588,6 @@
   "timezone": "",
   "title": "腾讯云账单详情",
   "uid": "bMm0tOmHk",
-  "version": 30,
+  "version": 32,
   "weekStart": ""
 }
