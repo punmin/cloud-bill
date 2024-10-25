@@ -996,6 +996,198 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 2,
+          "mappings": [],
+          "min": 0,
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 30
+      },
+      "id": 19,
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "values": [
+            "percent",
+            "value"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.1.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSource}"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select bill_month as \"time\",business_code_name,sum(real_total_cost) as \"应付款\" \r\nfrom tencent_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and owner_uin = \"${bill_account}\" and pay_mode_name=\"包年包月\"\r\ngroup by bill_month,business_code_name",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "aliyun_bill_resource_summary",
+          "timeColumn": "bill_month",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "产品分类成本占比-包年包月",
+      "transformations": [],
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 2,
+          "mappings": [],
+          "min": 0,
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 8,
+        "y": 30
+      },
+      "id": 20,
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "values": [
+            "percent",
+            "value"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.1.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSource}"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select bill_month as \"time\",business_code_name,sum(real_total_cost) as \"应付款\" \r\nfrom tencent_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and owner_uin = \"${bill_account}\" and pay_mode_name=\"按量计费\"\r\ngroup by bill_month,business_code_name",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "aliyun_bill_resource_summary",
+          "timeColumn": "bill_month",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "产品分类成本占比-按量计费",
+      "transformations": [],
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
             "mode": "thresholds"
           },
           "mappings": [],
@@ -1021,7 +1213,7 @@
         "h": 15,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 40
       },
       "id": 6,
       "options": {
@@ -1214,7 +1406,7 @@
         "h": 15,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 55
       },
       "id": 7,
       "options": {
@@ -1435,7 +1627,7 @@
         "h": 15,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 70
       },
       "id": 16,
       "options": {
@@ -1588,6 +1780,6 @@
   "timezone": "",
   "title": "腾讯云账单详情",
   "uid": "bMm0tOmHk",
-  "version": 32,
+  "version": 33,
   "weekStart": ""
 }
