@@ -63,4 +63,4 @@ mysql -ucloud_bill -h your_host  -p cloud_bill  < cloud_bill.sql
 - aws 账单的统计项和cost explorer的统计项不一致
   - 账单的统计项会有Data Transfer（流量费用），而cost explorer会将此类费用分摊到相关项目上（譬如rds、kafka、ELB、EC2等）
   - 账单的统计项Elastic Compute Cloud在cost explorer上会被分成 EC2 实例 和 EC2-其他
-  
+- 腾讯云费用账单中的对象存储的折扣是错的，而消耗账单的折扣是对的

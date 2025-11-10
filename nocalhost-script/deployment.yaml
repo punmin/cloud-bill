@@ -16,7 +16,7 @@ spec:
       containers:
         - command:
             - /bin/sh
-          image: golang:1.23.0
+          image: golang:1.24.0
           imagePullPolicy: Always
           name: go
           stdin: true

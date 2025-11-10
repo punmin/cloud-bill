@@ -156,7 +156,7 @@ func (handler *AliyunBillHandler) SaveBill(billMonth string, account CloudAccoun
 
 		discount := *tea.Float32(0)
 
-		if *rs.PretaxAmount != 0.0 {
+		if *rs.PretaxAmount > 0.0 && *rs.PretaxGrossAmount > 0.0 {
 			discount = *rs.PretaxAmount / *rs.PretaxGrossAmount
 		}
 
