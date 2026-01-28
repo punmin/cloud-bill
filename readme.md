@@ -31,6 +31,14 @@ mysql -ucloud_bill -h your_host  -p cloud_bill  < cloud_bill.sql
 - [接口说明](https://next.api.aliyun.com/api/BssOpenApi/2017-12-14/DescribeInstanceBill)
 - 请求频率限制 10次/秒
 
+## 火山引擎
+- 接口
+  - 账单中心>分页查询账单明细（统计项：实例；统计周期：账期） Billing.ListBillDetail(GroupPeriod=0,GroupTerm=1)
+  - 账单中心>分页查询账单明细（统计项：计费项；统计周期：账期） Billing.ListBillDetail(GroupPeriod=0,GroupTerm=0)
+- 账号权限 BillingCenterBillReadOnly
+- [接口说明](https://api.volcengine.com/api-docs/view?serviceCode=billing&version=2022-01-01&action=ListBillDetail)
+- 请求频率限制 5次/秒
+
 ## UCloud
 - 接口 
   - 财务中心>交易账单>账单明细 ListUBillDetail

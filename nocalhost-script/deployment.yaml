@@ -16,6 +16,9 @@ spec:
       containers:
         - command:
             - /bin/sh
+          env:
+            - name: GOPROXY
+              value: https://goproxy.cn,direct
           image: golang:1.24.0
           imagePullPolicy: Always
           name: go

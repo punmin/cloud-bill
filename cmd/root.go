@@ -50,6 +50,8 @@ var RootCmd = &cobra.Command{
 						SyncAliyunBillToDB(month, account)
 					case "tencent":
 						SyncTencentBillToDB(month, account)
+					case "volcengine":
+						SyncVolcengineBillToDB(month, account)
 					case "ucloud":
 						SyncUCloudBillToDB(month, account)
 					case "aws":
