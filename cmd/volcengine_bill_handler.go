@@ -48,7 +48,7 @@ func (handler *VolcengineBillHandler) GetBill(billMonth string, account CloudAcc
 		Limit:         volcengine.Int32(300),        //官方限制每次最多返回300
 		Offset:        volcengine.Int32(0),
 		GroupPeriod:   volcengine.Int32(0), //使用账期作为统计周期
-		GroupTerm:     volcengine.Int32(1), //按实例作为统计项
+		GroupTerm:     volcengine.Int32(0), //按计费项作为统计项，因为按计费项带实例规格信息，按实例不带实例规格信息
 		IgnoreZero:    volcengine.Int32(1), //忽略折后价为0的数据
 		NeedRecordNum: volcengine.Int32(1), //返回总记录数
 	}
