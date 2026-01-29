@@ -271,6 +271,9 @@ union all
 select bill_month, "aliyun" as cloud, bill_account_id, product_name, pretax_gross_amount as cost_cny, pretax_amount as real_cost_cny, cash_amount as cash_pay_cny 
 from aliyun_bill_resource_summary
 union all
+select bill_month, "volcengine" as cloud, `owner_id` as bill_account_id, product_zh as product_name, original_bill_amount as cost_cny, discount_bill_amount as real_cost_cny, payable_amount as cash_pay_cny 
+from volcengine_bill_resource_summary
+union all
 select bill_month, "tencent" as cloud, `owner_uin` as bill_account_id, `business_code_name` as product_name, total_cost as cost_cny, real_total_cost as real_cost_cny, cash_pay_amount as cash_pay_cny
 from tencent_bill_resource_summary) t1 
 left join (select bill_account_alias,bill_account_id from account_info) t2 
