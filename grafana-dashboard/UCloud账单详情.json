@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 355,
+  "id": 111,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -123,7 +123,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select bill_month as \"time\",resource_type,\r\n  (CASE WHEN DATE_FORMAT(bill_month,'%Y-%m-%d') >= DATE_FORMAT(FROM_UNIXTIME(${__from}/1000) + INTERVAL 1 MONTH, '%Y-%m-15') THEN (sum(amount_real)  - (lag(sum(amount_real),1,0) over (partition by resource_type order by bill_month))) ELSE 0 END) as \"上月环比\"\r\nfrom ucloud_bill_resource_summary\r\nwhere $__timeFilter(bill_month) and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,resource_type\r\norder by bill_month",
+          "rawSql": "select bill_month as \"time\",resource_type,\r\n  (CASE WHEN DATE_FORMAT(bill_month,'%Y-%m-%d') >= DATE_FORMAT(FROM_UNIXTIME(${__from}/1000) + INTERVAL 1 MONTH, '%Y-%m-15') THEN (sum(amount)  - (lag(sum(amount),1,0) over (partition by resource_type order by bill_month))) ELSE 0 END) as \"上月环比\"\r\nfrom ucloud_bill_resource_summary\r\nwhere $__timeFilter(bill_month) and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,resource_type\r\norder by bill_month",
           "refId": "A",
           "select": [
             [
@@ -243,7 +243,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select bill_month as \"time\",resource_type,\r\nsum(amount_real) as \"应付款\"\r\nfrom ucloud_bill_resource_summary\r\nwhere $__timeFilter(bill_month) and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,resource_type\r\norder by bill_month",
+          "rawSql": "select bill_month as \"time\",resource_type,\r\nsum(amount) as \"应付款\"\r\nfrom ucloud_bill_resource_summary\r\nwhere $__timeFilter(bill_month) and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,resource_type\r\norder by bill_month",
           "refId": "A",
           "select": [
             [
@@ -343,7 +343,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select bill_month as \"time\",sum(amount_real) as \"应付款\",sum(amount) as \"原价\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month",
+          "rawSql": "select bill_month as \"time\",sum(amount_real) as \"现金支付\",sum(amount) as \"应付款\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month",
           "refId": "A",
           "select": [
             [
@@ -429,7 +429,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select bill_month as \"time\",sum(amount_real)/sum(amount) as \"折扣率\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month",
+          "rawSql": "select bill_month as \"time\",sum(amount_real)/sum(amount) as \"现金支付占比\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month",
           "refId": "A",
           "select": [
             [
@@ -453,7 +453,7 @@
           ]
         }
       ],
-      "title": "总体折扣率",
+      "title": "现金支付占比",
       "transformations": [],
       "type": "stat"
     },
@@ -525,7 +525,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select bill_month as \"time\",resource_type,sum(amount_real) as \"应付款\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,resource_type",
+          "rawSql": "select bill_month as \"time\",resource_type,sum(amount) as \"应付款\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,resource_type",
           "refId": "A",
           "select": [
             [
@@ -621,7 +621,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select bill_month as \"time\",az_group_c_name,sum(amount_real) as \"应付款\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,az_group_c_name",
+          "rawSql": "select bill_month as \"time\",az_group_c_name,sum(amount) as \"应付款\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,az_group_c_name",
           "refId": "A",
           "select": [
             [
@@ -718,7 +718,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select bill_month as \"time\",charge_type,sum(amount_real) as \"应付款\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,charge_type",
+          "rawSql": "select bill_month as \"time\",charge_type,sum(amount) as \"应付款\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,charge_type",
           "refId": "A",
           "select": [
             [
@@ -762,7 +762,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -806,7 +807,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select bill_month as \"time\",resource_type,sum(amount_real) as \"应付款\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,resource_type\r\n",
+          "rawSql": "select bill_month as \"time\",resource_type,sum(amount) as \"应付款\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"\r\ngroup by bill_month,resource_type\r\n",
           "refId": "A",
           "select": [
             [
@@ -870,7 +871,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1026,7 +1028,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select bill_month as \"time\",resource_type as \"产品名称\",charge_type as \"计费模式\",item_details as \"产品配置\",az_group_c_name as \"地域\",resource_id as \"资源id\",order_type as \"订单类型\",amount as \"原价\",amount_real as \"优惠后总价\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"",
+          "rawSql": "select bill_month as \"time\",resource_type as \"产品名称\",charge_type as \"计费模式\",item_details as \"产品配置\",az_group_c_name as \"地域\",resource_id as \"资源id\",order_type as \"订单类型\",amount as \"订单金额\",amount_real as \"现金支付\" \r\nfrom ucloud_bill_resource_summary\r\nwhere date_format(bill_month,'%Y-%m') = \"${bill_month}\" and bill_account_id = \"${bill_account}\"",
           "refId": "A",
           "select": [
             [
@@ -1092,9 +1094,9 @@
       },
       {
         "current": {
-          "selected": false,
-          "text": "2024-09",
-          "value": "2024-09"
+          "selected": true,
+          "text": "2025-08",
+          "value": "2025-08"
         },
         "datasource": {
           "type": "mysql",
@@ -1148,6 +1150,6 @@
   "timezone": "",
   "title": "UCloud账单详情",
   "uid": "laN3ipiNk",
-  "version": 4,
+  "version": 2,
   "weekStart": ""
 }

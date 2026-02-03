@@ -265,7 +265,7 @@ select t1.bill_month ,t1.cloud, t2.bill_account_alias, t1.product_name, t1.cost_
 select bill_month, "aws" as cloud, bill_account_id, `service` as product_name, unblended_cost*exchange_rate as cost_cny, unblended_cost*exchange_rate as real_cost_cny, unblended_cost*exchange_rate as cash_pay_cny
 from aws_bill_resource_summary
 union all
-select bill_month, "ucloud" as cloud, bill_account_id, `resource_type` as product_name, amount as cost_cny, amount_real as real_cost_cny, amount_real as cash_pay_cny  
+select bill_month, "ucloud" as cloud, bill_account_id, `resource_type` as product_name, amount as cost_cny, amount as real_cost_cny, amount_real as cash_pay_cny  
 from ucloud_bill_resource_summary
 union all
 select bill_month, "aliyun" as cloud, bill_account_id, product_name, pretax_gross_amount as cost_cny, pretax_amount as real_cost_cny, cash_amount as cash_pay_cny 

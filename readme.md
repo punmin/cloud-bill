@@ -41,7 +41,7 @@ mysql -ucloud_bill -h your_host  -p cloud_bill  < cloud_bill.sql
 
 ## UCloud
 - 接口 
-  - 财务中心>交易账单>账单明细 ListUBillDetail
+  - 财务中心>交易账单>账单明细 ListUBillDetail (没有刊例价数据)
 - 账号权限 UBillFullAccess
 - [参考资料](https://docs.ucloud.cn/api/ubill-api/list_u_bill_detail)
 - 请求频率限制 未找到文档描述，建议设置为5次/秒
