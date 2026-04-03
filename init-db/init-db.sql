@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `tencent_bill_resource_summary` (
   `business_code` varchar(50) NULL COMMENT '产品编码',
   `business_code_name` varchar(100) NULL COMMENT '产品名称：用户所采购的各类云产品，例如：云服务器 CVM',
   `cash_pay_amount` decimal(18,8) NULL COMMENT '现金账户支出：通过现金账户支付的金额',
-  `config_desc` varchar(255) NULL COMMENT '配置描述：该资源下的计费项名称和用量合并展示，仅在资源账单体现',
+  `config_desc` varchar(500) NULL COMMENT '配置描述：该资源下的计费项名称和用量合并展示，仅在资源账单体现',
   `discount` decimal(3,2) NULL COMMENT '折扣率：本资源享受的折扣率（如果客户享受一口价/合同价则默认不展示，退费场景也默认不展示）',
   `extend_field1` varchar(255) NULL COMMENT '扩展字段1：产品对应的扩展属性信息，仅在资源账单体现',
   `extend_field2` varchar(255) NULL COMMENT '扩展字段2：产品对应的扩展属性信息，仅在资源账单体现',
